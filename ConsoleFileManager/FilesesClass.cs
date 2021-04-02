@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace ConsoleFileManager
@@ -23,9 +24,26 @@ namespace ConsoleFileManager
 
         List<FileClass> files = new List<FileClass>();
 
-        public FilesesClass(FolderClass folder)
+        public FilesesClass(string pathToFolder, IEnumerable<string> pathToFiles)
         {
-            _parentFolder = folder.PathFolder;
+            _parentFolder = pathToFolder;
+            AddFileses(pathToFiles);
+        }
+
+        /// <summary>
+        /// Добавление файлов в список для текущей папки
+        /// </summary>
+        /// <param name="pathToFiles"></param>
+        public void AddFileses(IEnumerable<string> pathToFiles)
+        {
+            foreach (string currentFile in pathToFiles)
+            {
+                if (File.Exists(currentFile))
+                {
+                    FileClass newFile = new FileClass(currentFile);
+                    _files.Add(newFile);
+                }
+            }
         }
     }
 }

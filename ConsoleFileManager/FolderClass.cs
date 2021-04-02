@@ -9,6 +9,7 @@ namespace ConsoleFileManager
     {
         private string _pathFolder;
         private FilesesClass _subFiles;
+        private DateTime _dateCreateFolder;
 
         public string PathFolder
         {
@@ -22,15 +23,35 @@ namespace ConsoleFileManager
             set { _subFiles = value; }
         }
 
+        public DateTime DateCreateFolder
+        {
+            get { return _dateCreateFolder; }
+        }
+
+        /// <summary>
+        /// Конструктор класса
+        /// </summary>
+        /// <param name="pathToCurrentFolder"></param>
+        public FolderClass(string pathToCurrentFolder)
+        {
+            if (Directory.Exists(pathToCurrentFolder))
+            {
+                _pathFolder = pathToCurrentFolder;
+                _dateCreateFolder = Directory.GetCreationTime(pathToCurrentFolder);
+                var allFilesesInFolder = Directory.EnumerateFiles(pathToCurrentFolder);
+
+                FilesesClass filesesClass = new FilesesClass(pathToCurrentFolder, allFilesesInFolder);
+            }
+        }
 
         public void CopyFolder()
         {
 
         }
 
-        public void MoveFolder(string currentFolderPath)
+        public void MoveFolder(string currentFolderPath, string newPath)
         {
-
+            
         }
 
         #region DeleteFolder
