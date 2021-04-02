@@ -3,7 +3,7 @@ using System.IO;
 
 namespace ConsoleFileManager
 {
-    class Program
+    class MainClass
     {
         static void Main(string[] args)
         {

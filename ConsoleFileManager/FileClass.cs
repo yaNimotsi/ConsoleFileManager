@@ -5,8 +5,9 @@ using System.IO;
 
 namespace ConsoleFileManager
 {
-    class WorkWithFile
+    class FileClass
     {
+        private FolderClass _parentFolder;
         private string _nameFile;
         private string _typeFile;
         private string _fileAcces;
@@ -19,6 +20,12 @@ namespace ConsoleFileManager
             get { return _nameFile; }
         }
 
+        //Ссылка на родительскую папку
+        public FolderClass ParentFolder
+        {
+            get { return _parentFolder; }
+            set { _parentFolder = value; }
+        }
 
         //Расширение файла
         public string TypeFile
@@ -44,7 +51,7 @@ namespace ConsoleFileManager
         /// Конструктор класса
         /// </summary>
         /// <param name="filePath"> Путь до нового экземпляра класса</param>
-        public WorkWithFile(string filePath)
+        public FileClass(string filePath)
         {
             if (File.Exists(filePath))
             {
@@ -136,11 +143,19 @@ namespace ConsoleFileManager
         }
         #endregion
 
-        static public void Replace(string currentPath)
+        #region Delete
+        static public void Delete(string currentPath)
         {
             if (File.Exists(currentPath))
-                File.Delete(currentPath);
+                try
+                {
+                    File.Delete(currentPath);
+                }
+                catch { }
+            else
+                Console.WriteLine("Файл, по указанному пути, не найден");
         }
+        #endregion
 
         /// <summary>
         ///Перечисление типов доступа к файлу. 
