@@ -44,27 +44,83 @@ namespace ConsoleFileManager
             }
         }
 
-        public void CopyFolder()
+        #region CopyFolder
+        /// <summary>
+        /// Запуск копирования папки в другую дирректорию
+        /// </summary>
+        /// <param name="sourcePath"></param>
+        /// <param name="targetPaht"></param>
+        public void CopyFolder(string sourcePath, string targetPaht)
         {
+            DirectoryInfo sourceInfo = new DirectoryInfo(sourcePath);
+            DirectoryInfo targetInfo = new DirectoryInfo(targetPaht);
 
+            CopyFolderAndAllInFolder(sourceInfo, targetInfo);
         }
 
-        public void MoveFolder(string currentFolderPath, string newPath)
+        private static void CopyFolderAndAllInFolder(DirectoryInfo source, DirectoryInfo target)
         {
+            try
+            {
+                //Проверка на различие путей исходной и целевой директории
+                if (source.FullName.ToLower() == target.FullName.ToLower())
+                    return;
+
+                //Проверка существования целевой директории
+                if (Directory.Exists(target.FullName) == false)
+                {
+                    Directory.CreateDirectory(target.FullName);
+                }
+
+                //Копирование файлов в текущей директории
+                foreach (FileInfo fi in source.GetFiles())
+                {
+                    //Копирование файла. Если файл существует, то он будет перезаписан
+                    fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
+                }
+
+
+                //Копирование каждой поддиректоии и их файлов рекурсивным методом
+                foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+                {
+                    DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
+                    CopyFolderAndAllInFolder(diSourceSubDir, nextTargetSubDir);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Процесс прерван: {0}", e.ToString());
+            }
             
         }
+        #endregion
+
+        #region MoveFolder
+        /// <summary>
+        /// Копирование директории по указанному пути
+        /// </summary>
+        /// <param name="sourcePath">Текущее расположение папки</param>
+        /// <param name="targetPaht">Путь, куда будет произведено копирование</param>
+        public void MoveFolder(string sourcePath, string targetPaht)
+        {
+            if (!Directory.Exists(sourcePath))
+                return;
+
+            Directory.Move(sourcePath, targetPaht);
+        }
+        #endregion
 
         #region DeleteFolder
         /// <summary>
         /// Удаление дирректории.Если есть подкаталоги, то удаление происходит после подтвержения пользователя
         /// </summary>
-        /// <param name="currentFolderPath"> Путь до папки, подлежащей удалению</param>
-        public void DeleteFolder(string currentFolderPath)
+        /// <param name="sourcePath"> Путь до папки, подлежащей удалению</param>
+        public void DeleteFolder(string sourcePath)
         {
-            if (Directory.Exists(currentFolderPath))
+            if (Directory.Exists(sourcePath))
             {
                 if (_subFiles.Files.Count == 0)
-                    Directory.Delete(currentFolderPath);
+                    Directory.Delete(sourcePath);
                 else
                     Console.WriteLine("Папка Не пустая. Вы хотите удалить папку и все ее содержимое?");
                     Console.WriteLine("Введите \"Y\" если хотите удалить, иначе введите \"N\"");
@@ -81,7 +137,7 @@ namespace ConsoleFileManager
                     }
 
                 if (userVal == "Y")
-                    DeleteFolder(currentFolderPath, true);
+                    DeleteFolder(sourcePath, true);
                 else
                     Console.WriteLine("Удаление отменено");
             }
