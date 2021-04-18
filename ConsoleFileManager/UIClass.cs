@@ -38,9 +38,6 @@ namespace ConsoleFileManager
                 _journalPath = appSettings["JournalPath"];
             }
 
-            Assembly localisationAssembly = Assembly.Load("ConsoleFileManager");
-            ResourceManager resourceManager = new ResourceManager("ConsoleFileManager.Properties.Resources", localisationAssembly);
-
             PrintTytle();
             PrintHorizontalBorder(1);
 
@@ -50,6 +47,12 @@ namespace ConsoleFileManager
                 GetContent(_firstPath);
         }
 
+        #region UpadteAppConfigFile
+        /// <summary>
+        /// Метод, для обновления файла конфигурации
+        /// </summary>
+        /// <param name="key"> Имя параметра</param>
+        /// <param name="value"> Знеачение параметра</param>
         private void UpdateAppConfigFile(string key, string value)
         {
             try
@@ -72,7 +75,12 @@ namespace ConsoleFileManager
                 Console.WriteLine("Error writing app settings");
             }
         }
-
+        #endregion
+        
+        /// <summary>
+        /// Получение первичной информации о содержимом текущей папки
+        /// </summary>
+        /// <param name="FolderPath"> Путь к текущей папке</param>
         private void GetContent(string FolderPath)
         {
             int rCounter = 2;
@@ -89,6 +97,12 @@ namespace ConsoleFileManager
             Console.ReadLine();
         }
 
+        #region PrintInfoAboutContent
+        /// <summary>
+        /// Вывод информации о подпапках в текущей папке
+        /// </summary>
+        /// <param name="dInfo"> Массив содержащий информацию о подпапках</param>
+        /// <param name="rCounter"> Строка для вставки</param>
         private void PrintInfoAboutContentFolders(DirectoryInfo[] dInfo, ref int rCounter)
         {
             foreach (var dirInf in dInfo)
@@ -106,6 +120,11 @@ namespace ConsoleFileManager
             }
         }
 
+        /// <summary>
+        /// Вывод информации о файлах в текущей папке
+        /// </summary>
+        /// <param name="fInfos"> Массив содержащий информацию о файлах</param>
+        /// <param name="rCounter"> Строка для вставки</param>
         private void PrintInfoAboutContentFiles(FileInfo[] fInfos, ref int rCounter)
         {
             foreach (var dirInf in fInfos)
@@ -126,7 +145,12 @@ namespace ConsoleFileManager
                 rCounter++;
             }
         }
+        #endregion
 
+        #region defaultPrint
+        /// <summary>
+        /// Печать заголовков столбцов
+        /// </summary>
         private void PrintTytle()
         {
             Console.SetCursorPosition(3, 0);
@@ -145,6 +169,10 @@ namespace ConsoleFileManager
             Console.Write("Размер");
         }
 
+        /// <summary>
+        /// Печать горинзонтальных линий
+        /// </summary>
+        /// <param name="rNum"></param>
         private void PrintHorizontalBorder(int rNum)
         {
             for (int i = 0; i < 120; i++)
@@ -154,6 +182,10 @@ namespace ConsoleFileManager
             }
         }
 
+        /// <summary>
+        /// Печать вертикальных линий
+        /// </summary>
+        /// <param name="cNum"></param>
         private void PrintVerticalBorder(int cNum)
         {
             var a = '┆';
@@ -163,5 +195,6 @@ namespace ConsoleFileManager
                 Console.Write('\u007C');
             }
         }
+        #endregion
     }
 }
