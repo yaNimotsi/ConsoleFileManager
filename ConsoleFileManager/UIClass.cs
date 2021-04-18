@@ -24,8 +24,6 @@ namespace ConsoleFileManager
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.BackgroundColor = ConsoleColor.Black;
 
-
-
             var appSettings = ConfigurationManager.AppSettings;
 
             if (appSettings.Count == 0)
@@ -38,50 +36,21 @@ namespace ConsoleFileManager
                 _userLastPath = appSettings["LastUserPath"];
                 _countRowToView = Convert.ToInt32(appSettings["CountRowToView"]);
                 _journalPath = appSettings["JournalPath"];
-                var asd = appSettings["NewSetting"];
-
             }
-
-
-            UpdateAppConfigFile("LastUserPath", @"C\");
-            UpdateAppConfigFile("NewSetting", @"C\");
-
-
-
-            
-
-
-
-
-
 
             Assembly localisationAssembly = Assembly.Load("ConsoleFileManager");
             ResourceManager resourceManager = new ResourceManager("ConsoleFileManager.Properties.Resources", localisationAssembly);
 
-            //ResourceManager resourceManager = new ResourceManager("Resources.resx", typeof(UIClass).Assembly);
+            PrintTytle();
+            PrintHorizontalBorder(1);
 
-            _firstPath = resourceManager.GetString("FristPath");
-            Console.WriteLine(_firstPath);
-            _userLastPath = resourceManager.GetString("UserLastPath");
-            Console.WriteLine(_userLastPath);
-
-            Console.WriteLine();
-
-            DirectoryInfo directoryInfo = new DirectoryInfo(@"E:\GeekBrains\Base C#\Algorimts\AlgoritmsLesson6");
-
-            foreach (var dirInf in directoryInfo.GetDirectories())
-            {
-                Console.WriteLine(dirInf.Name);
-            }
-
-            foreach(var dirInf in directoryInfo.GetFiles())
-            {
-                Console.WriteLine(dirInf.Name);
-            }
-            Console.ReadLine();
+            if (_userLastPath.Length > 0)
+                GetContent(_userLastPath);
+            else
+                GetContent(_firstPath);
         }
 
-        private void UpdateAppConfigFile(string key,string value)
+        private void UpdateAppConfigFile(string key, string value)
         {
             try
             {
@@ -97,11 +66,101 @@ namespace ConsoleFileManager
                 }
                 ConfigurationManager.RefreshSection(configFile.ConnectionStrings.SectionInformation.SectionName);
                 configFile.Save(ConfigurationSaveMode.Modified);
-                //ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
             }
             catch (ConfigurationErrorsException)
             {
                 Console.WriteLine("Error writing app settings");
+            }
+        }
+
+        private void GetContent(string FolderPath)
+        {
+            int rCounter = 2;
+
+            DirectoryInfo directoryInfo = new DirectoryInfo(FolderPath);
+
+            //Печать информации о папках
+            PrintInfoAboutContentFolders(directoryInfo.GetDirectories(), ref rCounter);
+
+            //Печать информации о файлах
+            FileInfo[] fileInfos = directoryInfo.GetFiles();
+            PrintInfoAboutContentFiles(fileInfos, ref rCounter);
+            
+            Console.ReadLine();
+        }
+
+        private void PrintInfoAboutContentFolders(DirectoryInfo[] dInfo, ref int rCounter)
+        {
+            foreach (var dirInf in dInfo)
+            {
+                Console.SetCursorPosition(3, rCounter);
+                Console.WriteLine(dirInf.Name);
+
+                Console.SetCursorPosition(87, rCounter);
+                Console.WriteLine(dirInf.CreationTime.ToShortDateString());
+
+                Console.SetCursorPosition(72, rCounter);
+                Console.WriteLine("Папка");
+
+                rCounter++;
+            }
+        }
+
+        private void PrintInfoAboutContentFiles(FileInfo[] fInfos, ref int rCounter)
+        {
+            foreach (var dirInf in fInfos)
+            {
+                Console.SetCursorPosition(3, rCounter);
+                Console.WriteLine(dirInf.Name);
+
+                Console.SetCursorPosition(87, rCounter);
+                Console.WriteLine(dirInf.CreationTime.ToShortDateString());
+
+
+                Console.SetCursorPosition(72, rCounter);
+                Console.WriteLine(dirInf.Extension);
+
+                Console.SetCursorPosition(105, rCounter);
+                Console.WriteLine(dirInf.Length);
+
+                rCounter++;
+            }
+        }
+
+        private void PrintTytle()
+        {
+            Console.SetCursorPosition(3, 0);
+            Console.Write("Имя");
+            PrintVerticalBorder(69);
+
+            Console.SetCursorPosition(73, 0);
+            Console.Write("Тип");
+            PrintVerticalBorder(84);
+
+            Console.SetCursorPosition(88, 0);
+            Console.Write("Дата создания");
+            PrintVerticalBorder(102);
+
+            Console.SetCursorPosition(106, 0);
+            Console.Write("Размер");
+        }
+
+        private void PrintHorizontalBorder(int rNum)
+        {
+            for (int i = 0; i < 120; i++)
+            {
+                Console.SetCursorPosition(i, rNum);
+                Console.Write('\u2014');
+            }
+        }
+
+        private void PrintVerticalBorder(int cNum)
+        {
+            var a = '┆';
+            for (int i = 0; i < 41; i++)
+            {
+                Console.SetCursorPosition(cNum, i);
+                Console.Write('\u007C');
             }
         }
     }
