@@ -52,42 +52,33 @@ namespace ConsoleFileManager
             }
             else
             {
-                foreach (KeyValueConfigurationElement key in settings)
-                {
-                    switch (key.Key)
-                    {
-                        case "FirstPath":
-                            _firstPath = key.Value;
-                            break;
-                        case "LastUserPath":
-                            _userLastPath = key.Value;
-                            break;
-                        case "CountRowToView":
-                            _countRowToView = Convert.ToInt32(key.Value);
-                            break;
-                        case "JournalPath":
-                            _journalPath = key.Value;
-                            break;
-                    };
-
-                }
-
+                _firstPath = appSettings["FirstPath"];
+                _userLastPath = appSettings["LastUserPath"];
+                _countRowToView = Convert.ToInt32(appSettings["CountRowToView"]);
+                _journalPath = appSettings["JournalPath"];
             }
+
+            PrintTytle();
+            PrintHorizontalBorder(1);
+
+            if (_userLastPath.Length > 0)
+                GetContent(_userLastPath);
+            else
+                GetContent(_firstPath);
         }
 
+        #region UpadteAppConfigFile
         /// <summary>
-        /// Обновление либо добавление параметра в файл конфигурации
+        /// Метод, для обновления файла конфигурации
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key"> Имя параметра</param>
+        /// <param name="value"> Знеачение параметра</param>
         private void UpdateAppConfigFile(string key, string value)
         {
             try
             {
-                //Получение файла конфигурации исполняемого файла
                 var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 var settings = configFile.AppSettings.Settings;
-
                 if (settings[key] == null)
                 {
                     settings.Add(key, value);
@@ -96,62 +87,137 @@ namespace ConsoleFileManager
                 {
                     settings[key].Value = value;
                 }
-
                 ConfigurationManager.RefreshSection(configFile.ConnectionStrings.SectionInformation.SectionName);
                 configFile.Save(ConfigurationSaveMode.Modified);
             }
             catch (ConfigurationErrorsException)
             {
-                Console.WriteLine("Обновить или добавить параметр в файл конфигурации не удалось!");
+                Console.WriteLine("Error writing app settings");
             }
         }
-
+        #endregion
+        
         /// <summary>
-        /// Печать содержимого папки
+        /// Получение первичной информации о содержимом текущей папки
         /// </summary>
-        /// <param name="folderPath">Адрес папки, содержимое которой необходимо отобразить</param>
-        private void PrintFolderContent(string folderPath)
-        { 
-            Console.Clear();
+        /// <param name="FolderPath"> Путь к текущей папке</param>
+        private void GetContent(string FolderPath)
+        {
+            int rCounter = 2;
 
-            DirectoryInfo directoryInfo = new DirectoryInfo(@"" + folderPath);
+            DirectoryInfo directoryInfo = new DirectoryInfo(FolderPath);
 
-            buffer = new List<string>();
+            //Печать информации о папках
+            PrintInfoAboutContentFolders(directoryInfo.GetDirectories(), ref rCounter);
+
+            //Печать информации о файлах
+            FileInfo[] fileInfos = directoryInfo.GetFiles();
+            PrintInfoAboutContentFiles(fileInfos, ref rCounter);
             
-            foreach (var dirInf in directoryInfo.GetDirectories())
-            {
-                buffer.Add(dirInf.Name);
-            }
-            foreach (var dirInf in directoryInfo.GetFiles())
-            {
-                buffer.Add(dirInf.Name);
-            }
-
-            PrintSectionContent();
-
             Console.ReadLine();
         }
 
+        #region PrintInfoAboutContent
         /// <summary>
-        /// Печать ограниченного кол-ва строк информации на странице
+        /// Вывод информации о подпапках в текущей папке
         /// </summary>
-        private void PrintSectionContent()
+        /// <param name="dInfo"> Массив содержащий информацию о подпапках</param>
+        /// <param name="rCounter"> Строка для вставки</param>
+        private void PrintInfoAboutContentFolders(DirectoryInfo[] dInfo, ref int rCounter)
         {
-            if (buffer.Count == 0)
-                return;
-
-            int x = 0, y = 0;
-            int sNum = numPage * _countRowToView;
-
-            for (int i = sNum; i < (numPage + 1) * _countRowToView && i < buffer.Count; i++)
+            foreach (var dirInf in dInfo)
             {
-                Console.SetCursorPosition(x + 3, y + 2);
-                Console.WriteLine(buffer[i]);
-                y++;
+                Console.SetCursorPosition(3, rCounter);
+                Console.WriteLine(dirInf.Name);
+
+                Console.SetCursorPosition(87, rCounter);
+                Console.WriteLine(dirInf.CreationTime.ToShortDateString());
+
+                Console.SetCursorPosition(72, rCounter);
+                Console.WriteLine("Папка");
+
+                rCounter++;
+            }
+        }
+
+        /// <summary>
+        /// Вывод информации о файлах в текущей папке
+        /// </summary>
+        /// <param name="fInfos"> Массив содержащий информацию о файлах</param>
+        /// <param name="rCounter"> Строка для вставки</param>
+        private void PrintInfoAboutContentFiles(FileInfo[] fInfos, ref int rCounter)
+        {
+            foreach (var dirInf in fInfos)
+            {
+                Console.SetCursorPosition(3, rCounter);
+                Console.WriteLine(dirInf.Name);
+
+                Console.SetCursorPosition(87, rCounter);
+                Console.WriteLine(dirInf.CreationTime.ToShortDateString());
+
+
+                Console.SetCursorPosition(72, rCounter);
+                Console.WriteLine(dirInf.Extension);
+
+                Console.SetCursorPosition(105, rCounter);
+                Console.WriteLine(dirInf.Length);
+
+                rCounter++;
+            }
+        }
+        #endregion
+
+        #region defaultPrint
+        /// <summary>
+        /// Печать заголовков столбцов
+        /// </summary>
+        private void PrintTytle()
+        {
+            Console.SetCursorPosition(3, 0);
+            Console.Write("Имя");
+            PrintVerticalBorder(69);
+
+            Console.SetCursorPosition(73, 0);
+            Console.Write("Тип");
+            PrintVerticalBorder(84);
+
+            Console.SetCursorPosition(88, 0);
+            Console.Write("Дата создания");
+            PrintVerticalBorder(102);
+
+            Console.SetCursorPosition(106, 0);
+            Console.Write("Размер");
+        }
+
+        /// <summary>
+        /// Печать горинзонтальных линий
+        /// </summary>
+        /// <param name="rNum"></param>
+        private void PrintHorizontalBorder(int rNum)
+        {
+            for (int i = 0; i < 120; i++)
+            {
+                Console.SetCursorPosition(i, rNum);
+                Console.Write('\u2014');
+            }
+        }
+
+        /// <summary>
+        /// Печать вертикальных линий
+        /// </summary>
+        /// <param name="cNum"></param>
+        private void PrintVerticalBorder(int cNum)
+        {
+            var a = '┆';
+            for (int i = 0; i < 41; i++)
+            {
+                Console.SetCursorPosition(cNum, i);
+                Console.Write('\u007C');
             }
 
             //Увеличение значения страницы с содержимым, которая отображена
             numPage++;
         }
+        #endregion
     }
 }
