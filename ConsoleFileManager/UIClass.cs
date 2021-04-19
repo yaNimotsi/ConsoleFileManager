@@ -22,10 +22,10 @@ namespace ConsoleFileManager
         public UIClass()
         {
             Console.CursorVisible = false;
-            
+
             Console.SetWindowSize(120, 60);
             Console.SetBufferSize(120, 60);
-            
+
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.BackgroundColor = ConsoleColor.Black;
 
@@ -33,10 +33,13 @@ namespace ConsoleFileManager
 
             ReadAppSettings();
 
+            PrintTytle();
+            PrintHorizontalBorder(2);
+
             if (_userLastPath.Length > 0)
-                PrintFolderContent(_userLastPath);
+                GetContent(_userLastPath);
             else
-                PrintFolderContent(_firstPath);
+                GetContent(_firstPath);
         }
 
         /// <summary>
@@ -44,9 +47,8 @@ namespace ConsoleFileManager
         /// </summary>
         private void ReadAppSettings()
         {
-            var appSettings = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            var settings = appSettings.AppSettings.Settings;
-            if (settings.Count == 0)
+            var appSettings = ConfigurationManager.AppSettings;
+            if (appSettings.Count == 0)
             {
                 Console.WriteLine("AppSetting is empty");
             }
@@ -57,14 +59,6 @@ namespace ConsoleFileManager
                 _countRowToView = Convert.ToInt32(appSettings["CountRowToView"]);
                 _journalPath = appSettings["JournalPath"];
             }
-
-            PrintTytle();
-            PrintHorizontalBorder(1);
-
-            if (_userLastPath.Length > 0)
-                GetContent(_userLastPath);
-            else
-                GetContent(_firstPath);
         }
 
         #region UpadteAppConfigFile
@@ -96,7 +90,7 @@ namespace ConsoleFileManager
             }
         }
         #endregion
-        
+
         /// <summary>
         /// Получение первичной информации о содержимом текущей папки
         /// </summary>
@@ -105,7 +99,7 @@ namespace ConsoleFileManager
         {
             int rCounter = 2;
 
-            DirectoryInfo directoryInfo = new DirectoryInfo(FolderPath);
+            DirectoryInfo directoryInfo = new DirectoryInfo(@"" + FolderPath);
 
             //Печать информации о папках
             PrintInfoAboutContentFolders(directoryInfo.GetDirectories(), ref rCounter);
@@ -113,7 +107,7 @@ namespace ConsoleFileManager
             //Печать информации о файлах
             FileInfo[] fileInfos = directoryInfo.GetFiles();
             PrintInfoAboutContentFiles(fileInfos, ref rCounter);
-            
+
             Console.ReadLine();
         }
 
@@ -208,7 +202,6 @@ namespace ConsoleFileManager
         /// <param name="cNum"></param>
         private void PrintVerticalBorder(int cNum)
         {
-            var a = '┆';
             for (int i = 0; i < 41; i++)
             {
                 Console.SetCursorPosition(cNum, i);
@@ -219,5 +212,26 @@ namespace ConsoleFileManager
             numPage++;
         }
         #endregion
+        /// <summary>
+        /// Печать ограниченного кол-ва строк информации на странице
+        /// </summary>
+        private void PrintSectionContent()
+        {
+            if (buffer.Count == 0)
+                return;
+
+            int x = 0, y = 0;
+            int sNum = numPage * _countRowToView;
+
+            for (int i = sNum; i < (numPage + 1) * _countRowToView && i < buffer.Count; i++)
+            {
+                Console.SetCursorPosition(x + 3, y + 2);
+                Console.WriteLine(buffer[i]);
+                y++;
+            }
+
+            //Увеличение значения страницы с содержимым, которая отображена
+            numPage++;
+        }
     }
 }
