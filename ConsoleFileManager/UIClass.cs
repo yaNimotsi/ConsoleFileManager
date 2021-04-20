@@ -34,7 +34,7 @@ namespace ConsoleFileManager
             ReadAppSettings();
 
             PrintTytle();
-            PrintHorizontalBorder(2);
+            PrintHorizontalBorder(1);
 
             if (_userLastPath.Length > 0)
                 GetContent(_userLastPath);
@@ -106,11 +106,12 @@ namespace ConsoleFileManager
 
             //Печать информации о файлах
             FileInfo[] fileInfos = directoryInfo.GetFiles();
-            PrintInfoAboutContentFiles(fileInfos, ref rCounter);
+            PrintInfoAboutContentFiles2(fileInfos, ref rCounter);
+            //PrintInfoAboutContentFiles(fileInfos, ref rCounter);
 
             Console.ReadLine();
         }
-
+        
         #region PrintInfoAboutContent
         /// <summary>
         /// Вывод информации о подпапках в текущей папке
@@ -155,6 +156,37 @@ namespace ConsoleFileManager
 
                 Console.SetCursorPosition(105, rCounter);
                 Console.WriteLine(dirInf.Length);
+
+                rCounter++;
+            }
+        }
+
+        /// <summary>
+        /// Вывод информации о файлах работая через собственный класс файлов
+        /// </summary>
+        /// <param name="fInfos"></param>
+        /// <param name="rCounter"></param>
+        private void PrintInfoAboutContentFiles2(FileInfo[] fInfos, ref int rCounter)
+        {
+            FilesesClass filesesInFolder = new FilesesClass(fInfos);
+
+            foreach (var fileInFolder in filesesInFolder.Files)
+            {
+                Console.SetCursorPosition(3, rCounter);
+                Console.WriteLine(fileInFolder.NameFile);
+                
+                Console.SetCursorPosition(50, rCounter);
+                Console.WriteLine(fileInFolder.FileAccesType);
+
+
+                Console.SetCursorPosition(87, rCounter);
+                Console.WriteLine(fileInFolder.DateCreate);
+
+                Console.SetCursorPosition(72, rCounter);
+                Console.WriteLine(fileInFolder.FileExtension);
+
+                Console.SetCursorPosition(105, rCounter);
+                Console.WriteLine(fileInFolder.FileSyze);
 
                 rCounter++;
             }

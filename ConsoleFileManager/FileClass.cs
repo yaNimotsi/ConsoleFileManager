@@ -7,11 +7,14 @@ namespace ConsoleFileManager
 {
     class FileClass
     {
-        private FolderClass _parentFolder;
+        private const string readType = "Чтение";
+        private const string writeType = "Запись";
+
         private string _nameFile;
-        private string _typeFile;
-        private string _fileAcces;
-        private int _sizeFile;
+        private string _extension;
+        private string _fileAccesType;
+        private string _dateCreate;
+        private int _fileSyze;
 
 
         //Имя файла
@@ -20,31 +23,29 @@ namespace ConsoleFileManager
             get { return _nameFile; }
         }
 
-        //Ссылка на родительскую папку
-        public FolderClass ParentFolder
-        {
-            get { return _parentFolder; }
-            set { _parentFolder = value; }
-        }
-
         //Расширение файла
-        public string TypeFile
+        public string FileExtension
         {
-            get { return _typeFile; }
+            get { return _extension; }
         }
 
 
         //Тип доступа к файлу (чтение, запись...)
-        public string FileAcces
+        public string FileAccesType
         {
-            get { return _fileAcces; }
+            get { return _fileAccesType; }
+        }
+
+        public string DateCreate
+        {
+            get { return _dateCreate; }
         }
 
 
         //Размер файла
-        public int SyzeFile
+        public int FileSyze
         {
-            get { return _sizeFile; }
+            get { return _fileSyze; }
         }
 
         /// <summary>
@@ -58,10 +59,19 @@ namespace ConsoleFileManager
                 FileInfo fileInfo = new FileInfo(filePath);
 
                 _nameFile = fileInfo.Name;
-                _typeFile = fileInfo.Extension;
-                _fileAcces = fileInfo.IsReadOnly.ToString();
-                _sizeFile = (int)fileInfo.Length;
+                _extension = fileInfo.Extension;
+                _fileAccesType = fileInfo.IsReadOnly.ToString();
+                _fileSyze = (int)fileInfo.Length;
             }
+        }
+
+        public FileClass(FileInfo fileInfo)
+        {
+            _nameFile = fileInfo.Name;
+            _extension = fileInfo.Extension;
+            _fileAccesType = fileInfo.IsReadOnly ? TypeAcces.Read.ToString() : TypeAcces.Write.ToString();
+            _dateCreate = fileInfo.CreationTime.ToShortDateString();
+            _fileSyze = (int)fileInfo.Length;
         }
         #region Method copyFile
         /// <summary>
