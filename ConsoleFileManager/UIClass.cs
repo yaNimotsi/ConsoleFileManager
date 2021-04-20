@@ -19,12 +19,15 @@ namespace ConsoleFileManager
         private List<string> buffer;
         private int numPage = 0;
 
+        private FilesesClass _filesesClass;
+        private FoldersClasse _foldersClasse;
+
         public UIClass()
         {
             Console.CursorVisible = false;
 
-            Console.SetWindowSize(120, 60);
-            Console.SetBufferSize(120, 60);
+            Console.SetWindowSize(120, 41);
+            Console.SetBufferSize(120, 41);
 
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.BackgroundColor = ConsoleColor.Black;
@@ -102,7 +105,8 @@ namespace ConsoleFileManager
             DirectoryInfo directoryInfo = new DirectoryInfo(@"" + FolderPath);
 
             //Печать информации о папках
-            PrintInfoAboutContentFolders(directoryInfo.GetDirectories(), ref rCounter);
+            PrintInfoAboutContentFolders2(directoryInfo.GetDirectories(), ref rCounter);
+            //PrintInfoAboutContentFolders(directoryInfo.GetDirectories(), ref rCounter);
 
             //Печать информации о файлах
             FileInfo[] fileInfos = directoryInfo.GetFiles();
@@ -125,15 +129,47 @@ namespace ConsoleFileManager
                 Console.SetCursorPosition(3, rCounter);
                 Console.WriteLine(dirInf.Name);
 
+                Console.SetCursorPosition(60, rCounter);
+                Console.WriteLine("Папка");
+
                 Console.SetCursorPosition(87, rCounter);
                 Console.WriteLine(dirInf.CreationTime.ToShortDateString());
 
-                Console.SetCursorPosition(72, rCounter);
-                Console.WriteLine("Папка");
+                
 
                 rCounter++;
             }
         }
+
+        /// <summary>
+        /// Метод вывода информации о подпапках работающий с классом FoldersClass
+        /// </summary>
+        /// <param name="dInfo"> Массив объектов о подпапках</param>
+        /// <param name="rCounter"> Строка для вставки</param>
+        private void PrintInfoAboutContentFolders2(DirectoryInfo[] dInfo, ref int rCounter)
+        {
+            _foldersClasse = new FoldersClasse(dInfo);
+
+            foreach (var folder in _foldersClasse.ListFolderClass)
+            {
+                Console.SetCursorPosition(3, rCounter);
+                Console.WriteLine(folder.FolderName);
+
+                Console.SetCursorPosition(60, rCounter);
+                Console.WriteLine("Папка");
+
+                Console.SetCursorPosition(87, rCounter);
+                Console.WriteLine(folder.DateCreateFolder);
+
+
+
+                rCounter++;
+            }
+        }
+
+
+
+
 
         /// <summary>
         /// Вывод информации о файлах в текущей папке
@@ -168,22 +204,21 @@ namespace ConsoleFileManager
         /// <param name="rCounter"></param>
         private void PrintInfoAboutContentFiles2(FileInfo[] fInfos, ref int rCounter)
         {
-            FilesesClass filesesInFolder = new FilesesClass(fInfos);
+            _filesesClass = new FilesesClass(fInfos);
 
-            foreach (var fileInFolder in filesesInFolder.Files)
+            foreach (var fileInFolder in _filesesClass.Files)
             {
                 Console.SetCursorPosition(3, rCounter);
                 Console.WriteLine(fileInFolder.NameFile);
                 
-                Console.SetCursorPosition(50, rCounter);
-                Console.WriteLine(fileInFolder.FileAccesType);
+                Console.SetCursorPosition(60, rCounter);
+                Console.WriteLine(fileInFolder.FileExtension);
 
+                Console.SetCursorPosition(72, rCounter);
+                Console.WriteLine(fileInFolder.FileAccesType);
 
                 Console.SetCursorPosition(87, rCounter);
                 Console.WriteLine(fileInFolder.DateCreate);
-
-                Console.SetCursorPosition(72, rCounter);
-                Console.WriteLine(fileInFolder.FileExtension);
 
                 Console.SetCursorPosition(105, rCounter);
                 Console.WriteLine(fileInFolder.FileSyze);
@@ -201,10 +236,14 @@ namespace ConsoleFileManager
         {
             Console.SetCursorPosition(3, 0);
             Console.Write("Имя");
-            PrintVerticalBorder(69);
+            PrintVerticalBorder(58);
+
+            Console.SetCursorPosition(62, 0);
+            Console.Write("Тип");
+            PrintVerticalBorder(70);
 
             Console.SetCursorPosition(73, 0);
-            Console.Write("Тип");
+            Console.Write("Доступ");
             PrintVerticalBorder(84);
 
             Console.SetCursorPosition(88, 0);

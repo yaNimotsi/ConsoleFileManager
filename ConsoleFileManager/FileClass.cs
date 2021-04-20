@@ -7,17 +7,14 @@ namespace ConsoleFileManager
 {
     class FileClass
     {
-        private const string readType = "Чтение";
-        private const string writeType = "Запись";
+        private readonly string _nameFile;
+        private readonly string _extension;
+        private readonly string _fileAccesType;
+        private readonly string _dateCreate;
 
-        private string _nameFile;
-        private string _extension;
-        private string _fileAccesType;
-        private string _dateCreate;
+        private readonly int _fileSyze;
 
-        private int _fileSyze;
-
-        private FileInfo _fileInfo;
+        private readonly FileInfo _fileInfo;
 
 
         //Имя файла

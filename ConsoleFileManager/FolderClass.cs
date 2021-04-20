@@ -7,25 +7,32 @@ namespace ConsoleFileManager
 {
     class FolderClass
     {
-        private string _pathFolder;
-        private FilesesClass _subFiles;
-        private DateTime _dateCreateFolder;
+        private readonly string _pathFolder;
+        //private FilesesClass _subFiles;
+        //private DateTime _dateCreateFolder;
+        private readonly string _dateCreateFolder;
+        private readonly string _folderName;
+        private readonly DirectoryInfo _directoryInfo;
 
         public string PathFolder
         {
             get { return _pathFolder; }
-            set { _pathFolder = value; }
         }
 
-        public FilesesClass SubFileses
+        /*public FilesesClass SubFileses
         {
             get { return _subFiles; }
             set { _subFiles = value; }
-        }
+        }*/
 
-        public DateTime DateCreateFolder
+        public string DateCreateFolder
         {
             get { return _dateCreateFolder; }
+        }
+
+        public string FolderName
+        {
+            get { return _folderName; }
         }
 
         /// <summary>
@@ -37,11 +44,16 @@ namespace ConsoleFileManager
             if (Directory.Exists(pathToCurrentFolder))
             {
                 _pathFolder = pathToCurrentFolder;
-                _dateCreateFolder = Directory.GetCreationTime(pathToCurrentFolder);
-                var allFilesesInFolder = Directory.EnumerateFiles(pathToCurrentFolder);
-
-                FilesesClass filesesClass = new FilesesClass(pathToCurrentFolder, allFilesesInFolder);
+                _dateCreateFolder = Directory.GetCreationTime(pathToCurrentFolder).ToString();
             }
+        }
+
+        public FolderClass(DirectoryInfo directoryInfo)
+        {
+            _pathFolder = directoryInfo.FullName;
+            _dateCreateFolder = directoryInfo.CreationTime.ToShortDateString();
+            _folderName = directoryInfo.Name;
+            this._directoryInfo = directoryInfo;
         }
 
         #region CopyFolder
@@ -119,7 +131,7 @@ namespace ConsoleFileManager
         {
             if (Directory.Exists(sourcePath))
             {
-                if (_subFiles.Files.Count == 0)
+                if (/*_subFiles.Files.Count == 0*/true)
                     Directory.Delete(sourcePath);
                 else
                     Console.WriteLine("Папка Не пустая. Вы хотите удалить папку и все ее содержимое?");
