@@ -14,7 +14,10 @@ namespace ConsoleFileManager
         private string _extension;
         private string _fileAccesType;
         private string _dateCreate;
+
         private int _fileSyze;
+
+        private FileInfo _fileInfo;
 
 
         //Имя файла
@@ -48,6 +51,11 @@ namespace ConsoleFileManager
             get { return _fileSyze; }
         }
 
+        public FileInfo CurrentFileInfo
+        {
+            get { return _fileInfo; }
+        }
+
         /// <summary>
         /// Конструктор класса
         /// </summary>
@@ -56,17 +64,23 @@ namespace ConsoleFileManager
         {
             if (File.Exists(filePath))
             {
-                FileInfo fileInfo = new FileInfo(filePath);
+                _fileInfo = new FileInfo(filePath);
 
-                _nameFile = fileInfo.Name;
-                _extension = fileInfo.Extension;
-                _fileAccesType = fileInfo.IsReadOnly.ToString();
-                _fileSyze = (int)fileInfo.Length;
+                _nameFile = _fileInfo.Name;
+                _extension = _fileInfo.Extension;
+                _fileAccesType = _fileInfo.IsReadOnly.ToString();
+                _fileSyze = (int)_fileInfo.Length;
             }
         }
 
+        /// <summary>
+        /// Конструктор класса
+        /// </summary>
+        /// <param name="fileInfo"> Провайдер содержащий информацию о файле и методы работы с ним</param>
         public FileClass(FileInfo fileInfo)
         {
+            this._fileInfo = fileInfo;
+
             _nameFile = fileInfo.Name;
             _extension = fileInfo.Extension;
             _fileAccesType = fileInfo.IsReadOnly ? TypeAcces.Read.ToString() : TypeAcces.Write.ToString();
