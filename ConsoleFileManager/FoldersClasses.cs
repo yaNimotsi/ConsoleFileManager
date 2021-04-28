@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace ConsoleFileManager
 {
-    class FoldersClasse
+    class FoldersClasses
     {
         private List<FolderClass> _subFolders = new List<FolderClass>();
 
@@ -14,7 +12,7 @@ namespace ConsoleFileManager
             get { return _subFolders; }
         }
 
-        public FoldersClasse(DirectoryInfo[] directoryInfos)
+        public FoldersClasses(DirectoryInfo[] directoryInfos)
         {
             AddSubFolders(directoryInfos);
         }

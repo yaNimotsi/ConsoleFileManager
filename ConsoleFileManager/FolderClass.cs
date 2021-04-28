@@ -1,14 +1,13 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ConsoleFileManager
 {
     class FolderClass
     {
         private readonly string _pathFolder;
-        //private FilesesClass _subFiles;
+        //private FilesClass _subFiles;
         //private DateTime _dateCreateFolder;
         private readonly string _dateCreateFolder;
         private readonly string _folderName;
@@ -18,12 +17,6 @@ namespace ConsoleFileManager
         {
             get { return _pathFolder; }
         }
-
-        /*public FilesesClass SubFileses
-        {
-            get { return _subFiles; }
-            set { _subFiles = value; }
-        }*/
 
         public string DateCreateFolder
         {
@@ -41,11 +34,10 @@ namespace ConsoleFileManager
         /// <param name="pathToCurrentFolder"></param>
         public FolderClass(string pathToCurrentFolder)
         {
-            if (Directory.Exists(pathToCurrentFolder))
-            {
-                _pathFolder = pathToCurrentFolder;
-                _dateCreateFolder = Directory.GetCreationTime(pathToCurrentFolder).ToString();
-            }
+            if (!Directory.Exists(pathToCurrentFolder)) return;
+
+            _pathFolder = pathToCurrentFolder;
+            _dateCreateFolder = Directory.GetCreationTime(pathToCurrentFolder).ToString(CultureInfo.InvariantCulture);
         }
 
         public FolderClass(DirectoryInfo directoryInfo)
@@ -134,6 +126,7 @@ namespace ConsoleFileManager
                 if (/*_subFiles.Files.Count == 0*/true)
                     Directory.Delete(sourcePath);
                 else
+                {
                     Console.WriteLine("Папка Не пустая. Вы хотите удалить папку и все ее содержимое?");
                     Console.WriteLine("Введите \"Y\" если хотите удалить, иначе введите \"N\"");
 
@@ -146,12 +139,12 @@ namespace ConsoleFileManager
                         Console.WriteLine("Введите \"Y\" если хотите удалить, иначе введите \"N\"");
 
                         userVal = Console.ReadLine();
+                        if (userVal == "Y")
+                            DeleteFolder(sourcePath, true);
+                        else
+                            Console.WriteLine("Удаление отменено");
                     }
-
-                if (userVal == "Y")
-                    DeleteFolder(sourcePath, true);
-                else
-                    Console.WriteLine("Удаление отменено");
+                }
             }
             else
                 Console.WriteLine("Папка, по указанному пути, не найдена");
@@ -163,8 +156,7 @@ namespace ConsoleFileManager
             {
                 Directory.Delete(currentFolderPath, flag);
             }
-            catch (Exception e) { Console.WriteLine($"Произошла ошибка - {e}"); };
-            
+            catch (Exception e) { Console.WriteLine($"Произошла ошибка - {e}"); }
         }
         #endregion
     }

@@ -59,15 +59,14 @@ namespace ConsoleFileManager
         /// <param name="filePath"> Путь до нового экземпляра класса</param>
         public FileClass(string filePath)
         {
-            if (File.Exists(filePath))
-            {
-                _fileInfo = new FileInfo(filePath);
+            if (!File.Exists(filePath)) return;
 
-                _nameFile = _fileInfo.Name;
-                _extension = _fileInfo.Extension;
-                _fileAccesType = _fileInfo.IsReadOnly.ToString();
-                _fileSyze = (int)_fileInfo.Length;
-            }
+            _fileInfo = new FileInfo(filePath);
+
+            _nameFile = _fileInfo.Name;
+            _extension = _fileInfo.Extension;
+            _fileAccesType = _fileInfo.IsReadOnly.ToString();
+            _fileSyze = (int)_fileInfo.Length;
         }
 
         /// <summary>
@@ -80,7 +79,7 @@ namespace ConsoleFileManager
 
             _nameFile = fileInfo.Name;
             _extension = fileInfo.Extension;
-            _fileAccesType = fileInfo.IsReadOnly ? TypeAcces.Read.ToString() : TypeAcces.Write.ToString();
+            _fileAccesType = fileInfo.IsReadOnly ? TypeAccess.Read.ToString() : TypeAccess.Write.ToString();
             _dateCreate = fileInfo.CreationTime.ToShortDateString();
             _fileSyze = (int)fileInfo.Length;
         }
@@ -94,12 +93,10 @@ namespace ConsoleFileManager
         {
             if (File.Exists(newPath))
             {
-                string userVal = "";
-
                 Console.WriteLine("Файл, по новому пути, уже существует. Перезаписать его?");
                 Console.WriteLine("Введите \"Y\" если хотите перезаписать файл, иначе введите \"N\"");
 
-                userVal = Console.ReadLine();
+                var userVal = Console.ReadLine();
 
                 while (userVal != "Y" || userVal != "N")
                 {
@@ -140,10 +137,11 @@ namespace ConsoleFileManager
                 if (!File.Exists(newPath))
                     File.Move(currentPath, newPath);
                 else
+                {
                     Console.WriteLine("Файл, по новому пути, уже существует. Перезаписать его?");
                     Console.WriteLine("Введите \"Y\" если хотите перезаписать файл, иначе введите \"N\"");
 
-                    string userVal = Console.ReadLine();
+                    var userVal = Console.ReadLine();
 
                     while (userVal != "Y" || userVal != "N")
                     {
@@ -158,6 +156,8 @@ namespace ConsoleFileManager
                         CopyFile(currentPath, newPath, true);
                     else
                         Console.WriteLine("Перемещение отменено");
+                }
+                    
             }
             else
                 Console.WriteLine("Исходный файл не найден. Проверьте корректность пути");
@@ -165,14 +165,17 @@ namespace ConsoleFileManager
         #endregion
 
         #region Delete
-        static public void Delete(string currentPath)
+        public void Delete(string currentPath)
         {
             if (File.Exists(currentPath))
                 try
                 {
                     File.Delete(currentPath);
                 }
-                catch { }
+                catch
+                {
+                    // ignored
+                }
             else
                 Console.WriteLine("Файл, по указанному пути, не найден");
         }
@@ -181,11 +184,10 @@ namespace ConsoleFileManager
         /// <summary>
         ///Перечисление типов доступа к файлу. 
         /// </summary>
-        public enum TypeAcces
+        public enum TypeAccess
         {
             Read,
-            Write,
-            ReadAndWrite
+            Write
         }
     }
 }
