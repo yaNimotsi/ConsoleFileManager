@@ -92,10 +92,9 @@ namespace ConsoleFileManager
         /// <param name="newPath">Путь, куда файл будет скопирован</param>
         public void CopyFile(string currentPath, string newPath)
         {
+            string userVal;
             if (File.Exists(newPath))
             {
-                string userVal = "";
-
                 Console.WriteLine("Файл, по новому пути, уже существует. Перезаписать его?");
                 Console.WriteLine("Введите \"Y\" если хотите перезаписать файл, иначе введите \"N\"");
 
@@ -140,6 +139,7 @@ namespace ConsoleFileManager
                 if (!File.Exists(newPath))
                     File.Move(currentPath, newPath);
                 else
+                {
                     Console.WriteLine("Файл, по новому пути, уже существует. Перезаписать его?");
                     Console.WriteLine("Введите \"Y\" если хотите перезаписать файл, иначе введите \"N\"");
 
@@ -158,6 +158,7 @@ namespace ConsoleFileManager
                         CopyFile(currentPath, newPath, true);
                     else
                         Console.WriteLine("Перемещение отменено");
+                }
             }
             else
                 Console.WriteLine("Исходный файл не найден. Проверьте корректность пути");
@@ -172,7 +173,10 @@ namespace ConsoleFileManager
                 {
                     File.Delete(currentPath);
                 }
-                catch { }
+                catch
+                {
+                    // ignored
+                }
             else
                 Console.WriteLine("Файл, по указанному пути, не найден");
         }

@@ -1,23 +1,19 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ConsoleFileManager
 {
     class FolderClass
     {
         private readonly string _pathFolder;
-        //private FilesesClass _subFiles;
+        private FilesesClass _subFiles;
         //private DateTime _dateCreateFolder;
         private readonly string _dateCreateFolder;
         private readonly string _folderName;
         private readonly DirectoryInfo _directoryInfo;
 
-        public string PathFolder
-        {
-            get { return _pathFolder; }
-        }
+        public string PathFolder => _pathFolder;
 
         /*public FilesesClass SubFileses
         {
@@ -25,15 +21,9 @@ namespace ConsoleFileManager
             set { _subFiles = value; }
         }*/
 
-        public string DateCreateFolder
-        {
-            get { return _dateCreateFolder; }
-        }
+        public string DateCreateFolder => _dateCreateFolder;
 
-        public string FolderName
-        {
-            get { return _folderName; }
-        }
+        public string FolderName => _folderName;
 
         /// <summary>
         /// Конструктор класса
@@ -41,11 +31,10 @@ namespace ConsoleFileManager
         /// <param name="pathToCurrentFolder"></param>
         public FolderClass(string pathToCurrentFolder)
         {
-            if (Directory.Exists(pathToCurrentFolder))
-            {
-                _pathFolder = pathToCurrentFolder;
-                _dateCreateFolder = Directory.GetCreationTime(pathToCurrentFolder).ToString();
-            }
+            if (!Directory.Exists(pathToCurrentFolder)) return;
+
+            _pathFolder = pathToCurrentFolder;
+            _dateCreateFolder = Directory.GetCreationTime(pathToCurrentFolder).ToString(CultureInfo.InvariantCulture);
         }
 
         public FolderClass(DirectoryInfo directoryInfo)
@@ -53,7 +42,7 @@ namespace ConsoleFileManager
             _pathFolder = directoryInfo.FullName;
             _dateCreateFolder = directoryInfo.CreationTime.ToShortDateString();
             _folderName = directoryInfo.Name;
-            this._directoryInfo = directoryInfo;
+            _directoryInfo = directoryInfo;
         }
 
         #region CopyFolder
@@ -101,9 +90,9 @@ namespace ConsoleFileManager
             }
             catch (Exception e)
             {
-                Console.WriteLine("Процесс прерван: {0}", e.ToString());
+                Console.WriteLine("Процесс прерван: {0}", e);
             }
-            
+
         }
         #endregion
 
@@ -112,13 +101,13 @@ namespace ConsoleFileManager
         /// Копирование директории по указанному пути
         /// </summary>
         /// <param name="sourcePath">Текущее расположение папки</param>
-        /// <param name="targetPaht">Путь, куда будет произведено копирование</param>
-        public void MoveFolder(string sourcePath, string targetPaht)
+        /// <param name="targetPath">Путь, куда будет произведено копирование</param>
+        public void MoveFolder(string sourcePath, string targetPath)
         {
             if (!Directory.Exists(sourcePath))
                 return;
 
-            Directory.Move(sourcePath, targetPaht);
+            Directory.Move(sourcePath, targetPath);
         }
         #endregion
 
@@ -131,13 +120,14 @@ namespace ConsoleFileManager
         {
             if (Directory.Exists(sourcePath))
             {
-                if (/*_subFiles.Files.Count == 0*/true)
+                if (_subFiles.Files.Count == 0)
                     Directory.Delete(sourcePath);
                 else
+                {
                     Console.WriteLine("Папка Не пустая. Вы хотите удалить папку и все ее содержимое?");
                     Console.WriteLine("Введите \"Y\" если хотите удалить, иначе введите \"N\"");
 
-                    string userVal = Console.ReadLine();
+                    var userVal = Console.ReadLine();
 
                     while (userVal != "Y" || userVal != "N")
                     {
@@ -148,23 +138,25 @@ namespace ConsoleFileManager
                         userVal = Console.ReadLine();
                     }
 
-                if (userVal == "Y")
-                    DeleteFolder(sourcePath, true);
-                else
-                    Console.WriteLine("Удаление отменено");
+                    if (userVal == "Y")
+                        DeleteFolder(sourcePath, true);
+                    else
+                        Console.WriteLine("Удаление отменено");
+                }
             }
             else
+            {
                 Console.WriteLine("Папка, по указанному пути, не найдена");
+            }
         }
 
-        public void DeleteFolder(string currentFolderPath, bool flag)
+        private static void DeleteFolder(string currentFolderPath, bool flag)
         {
             try
             {
                 Directory.Delete(currentFolderPath, flag);
             }
-            catch (Exception e) { Console.WriteLine($"Произошла ошибка - {e}"); };
-            
+            catch (Exception e) { Console.WriteLine($"Произошла ошибка - {e}"); }
         }
         #endregion
     }

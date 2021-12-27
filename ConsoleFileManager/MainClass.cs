@@ -7,7 +7,7 @@ namespace ConsoleFileManager
     {
         static void Main(string[] args)
         {
-            UIClass newUI = new UIClass();
+            var newUI = new UIClass();
 
             Console.ReadLine();
         }
