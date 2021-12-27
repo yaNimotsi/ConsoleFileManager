@@ -19,9 +19,7 @@ namespace ConsoleFileManager
 
         private List<string> buffer;
         private int numPage = 0;
-
-        private FilesClass _filesClass;
-        private FoldersClasses _foldersClasses;
+        
         
         public UIClass()
         {
