@@ -10,14 +10,19 @@ namespace ConsoleFileManager
         private string _userLastPath;
         private int _countRowToView;
         private static int _rowsToTopMargin;
+        private const int _rowToCommand = 39;
+        private const int _columnToCommand = 17;
         //public string JournalPath { get; set; }
+
+        private IEnumerable<DirectoryInfo> _subFolders; 
+        private IEnumerable<FileInfo> _subFiles; 
 
         private List<string> buffer;
         private int numPage = 0;
 
         private FilesClass _filesClass;
         private FoldersClasses _foldersClasses;
-
+        
         public UIClass()
         {
             Console.CursorVisible = false;
@@ -50,12 +55,18 @@ namespace ConsoleFileManager
                 //JournalPath = appSettings["JournalPath"];
             }
 
-            var subFolders = FolderContents.GetSubFolders(_firstPath);
-            var subFiles = FolderContents.GetSubFiles(_firstPath);
+            _subFolders = FolderContents.GetSubFolders(_firstPath);
+            _subFiles = FolderContents.GetSubFiles(_firstPath);
 
             PrintTable();
 
-            GetContent(_userLastPath.Length > 0 ? _userLastPath : _firstPath);
+            var a = 2;
+
+            PrintInfoAboutContentFolders(ref a);
+            PrintInfoAboutContentFiles(ref a);
+            Console.SetCursorPosition(_columnToCommand, _rowToCommand);
+
+            //GetContent(_userLastPath.Length > 0 ? _userLastPath : _firstPath);
         }
 
         #region UpadteAppConfigFile
@@ -88,50 +99,13 @@ namespace ConsoleFileManager
         }
         #endregion
 
-        /// <summary>
-        /// Получение первичной информации о содержимом текущей папки
-        /// </summary>
-        /// <param name="folderPath"> Путь к текущей папке</param>
-        private static void GetContent(string folderPath)
+        
+        private void PrintInfoAboutContentFolders(ref int rCounter)
         {
-            var rCounter = 2;
-
-            var directoryInfo = new DirectoryInfo(@"" + folderPath);
-
-            //Печать информации о папках
-            PrintInfoAboutContentFolders(directoryInfo.GetDirectories(), ref rCounter);
-
-            //Печать информации о файлах
-            var fileInfos = directoryInfo.GetFiles();
-            PrintInfoAboutContentFiles(fileInfos, ref rCounter);
-
-            Console.ReadLine();
-        }
-
-        private static void PrintInfoAboutContentFiles(FileInfo[] fileInfos, ref int rCounter)
-        {
-            //throw new NotImplementedException();
-        }
-
-        private static void PrintInfoAboutContentFolders(DirectoryInfo[] getDirectories, ref int rCounter)
-        {
-            //throw new NotImplementedException();
-        }
-
-        #region PrintInfoAboutContent
-        /// <summary>
-        /// Метод вывода информации о подпапках работающий с классом FoldersClass
-        /// </summary>
-        /// <param name="dInfo"> Массив объектов о подпапках</param>
-        /// <param name="rCounter"> Строка для вставки</param>
-        private void PrintInfoAboutContentFolders2(DirectoryInfo[] dInfo, ref int rCounter)
-        {
-            _foldersClasses = new FoldersClasses(dInfo);
-
-            foreach (var folder in _foldersClasses.ListFolderClass)
+            foreach (var folder in _subFolders)
             {
                 Console.SetCursorPosition(3, rCounter);
-                Console.WriteLine(folder.FolderName);
+                Console.WriteLine(folder.Name);
 
                 Console.SetCursorPosition(60, rCounter);
                 Console.WriteLine("Папка");
@@ -140,36 +114,39 @@ namespace ConsoleFileManager
             }
         }
 
-        /// <summary>
-        /// Вывод информации о файлах работая через собственный класс файлов
-        /// </summary>
-        /// <param name="fInfos"></param>
-        /// <param name="rCounter"></param>
-        private void PrintInfoAboutContentFiles2(FileInfo[] fInfos, ref int rCounter)
+        private void PrintInfoAboutContentFiles(ref int rCounter)
         {
-            _filesClass = new FilesClass(fInfos);
-
-            foreach (var fileInFolder in _filesClass.Files)
+            foreach (var fileInFolder in _subFiles)
             {
                 Console.SetCursorPosition(3, rCounter);
-                Console.WriteLine(fileInFolder.NameFile);
+                var nameFile = fileInFolder.Name;
+                if (nameFile.Length > 50)
+                {
+                    nameFile = nameFile.Remove(50) + "...";
+                }
+                Console.WriteLine(nameFile);
 
                 Console.SetCursorPosition(60, rCounter);
-                Console.WriteLine(fileInFolder.FileExtension);
+                Console.WriteLine(fileInFolder.Extension);
 
                 Console.SetCursorPosition(72, rCounter);
-                Console.WriteLine(fileInFolder.FileAccesType);
 
-                Console.SetCursorPosition(87, rCounter);
-                Console.WriteLine(fileInFolder.DateCreate);
+                if ((fileInFolder.Attributes & FileAttributes.ReadOnly) != 0)
+                {
+                    Console.WriteLine("ReadOnly");
+                }
 
-                Console.SetCursorPosition(105, rCounter);
-                Console.WriteLine(fileInFolder.FileSyze);
+                //Console.WriteLine((fileInFolder.Attributes & FileAttributes.ReadOnly) != 0  );
+
+                Console.SetCursorPosition(85, rCounter);
+                Console.WriteLine(fileInFolder.CreationTime);
+
+                Console.SetCursorPosition(108, rCounter);
+                Console.WriteLine(fileInFolder.Length);
 
                 rCounter++;
             }
         }
-        #endregion
 
         #region printTableBorder
 
@@ -200,10 +177,13 @@ namespace ConsoleFileManager
 
             Console.SetCursorPosition(87, rowToPrintHeader);
             Console.Write("Дата создания");
-            PrintVerticalBorder(102);
+            PrintVerticalBorder(105);
 
-            Console.SetCursorPosition(105, rowToPrintHeader);
+            Console.SetCursorPosition(108, rowToPrintHeader);
             Console.Write("Размер");
+
+            Console.SetCursorPosition(0, _rowToCommand);
+            Console.Write("Введите команду:");
         }
 
         /// <summary>
@@ -216,6 +196,8 @@ namespace ConsoleFileManager
             {
                 Console.SetCursorPosition(i, rowsToTopMargin);
                 Console.Write('\u2014');
+                Console.SetCursorPosition(i, _rowToCommand - 1);
+                Console.Write('\u2014');
             }
         }
 
@@ -225,13 +207,14 @@ namespace ConsoleFileManager
         /// <param name="cNum"></param>
         private static void PrintVerticalBorder(int cNum)
         {
-            for (var i = 0; i < 41; i++)
+            for (var i = 0; i < 39; i++)
             {
                 Console.SetCursorPosition(cNum, i);
                 Console.Write('\u007C');
             }
         }
         #endregion
+
         /// <summary>
         /// Печать ограниченного кол-ва строк информации на странице
         /// </summary>
