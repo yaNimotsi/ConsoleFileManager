@@ -9,7 +9,8 @@ namespace ConsoleFileManager
         private string _firstPath;
         private string _userLastPath;
         private int _countRowToView;
-        public string JournalPath { get; set; }
+        private static int _rowsToTopMargin;
+        //public string JournalPath { get; set; }
 
         private List<string> buffer;
         private int numPage = 0;
@@ -28,11 +29,6 @@ namespace ConsoleFileManager
             Console.Title = "ConsoleFileManager";
 
             StartSettings();
-
-            PrintTitle();
-            PrintHorizontalBorder(1);
-
-            GetContent(_userLastPath.Length > 0 ? _userLastPath : _firstPath);
         }
 
         /// <summary>
@@ -51,16 +47,15 @@ namespace ConsoleFileManager
                 _firstPath = appSettings["FirstPath"];
                 _userLastPath = appSettings["LastUserPath"];
                 _countRowToView = Convert.ToInt32(appSettings["CountRowToView"]);
-                JournalPath = appSettings["JournalPath"];
+                //JournalPath = appSettings["JournalPath"];
             }
 
-            PrintTitle();
-            PrintHorizontalBorder(1);
+            var subFolders = FolderContents.GetSubFolders(_firstPath);
+            var subFiles = FolderContents.GetSubFiles(_firstPath);
 
-            if (_userLastPath.Length > 0)
-                GetContent(_userLastPath);
-            else
-                GetContent(_firstPath);
+            PrintTable();
+
+            GetContent(_userLastPath.Length > 0 ? _userLastPath : _firstPath);
         }
 
         #region UpadteAppConfigFile
@@ -97,7 +92,7 @@ namespace ConsoleFileManager
         /// Получение первичной информации о содержимом текущей папки
         /// </summary>
         /// <param name="folderPath"> Путь к текущей папке</param>
-        private void GetContent(string folderPath)
+        private static void GetContent(string folderPath)
         {
             var rCounter = 2;
 
@@ -115,12 +110,12 @@ namespace ConsoleFileManager
 
         private static void PrintInfoAboutContentFiles(FileInfo[] fileInfos, ref int rCounter)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         private static void PrintInfoAboutContentFolders(DirectoryInfo[] getDirectories, ref int rCounter)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         #region PrintInfoAboutContent
@@ -176,41 +171,50 @@ namespace ConsoleFileManager
         }
         #endregion
 
-        #region defaultPrint
+        #region printTableBorder
+
+        private static void PrintTable()
+        {
+            if (_rowsToTopMargin == 0) _rowsToTopMargin = 1;
+
+            PrintTitle(_rowsToTopMargin - 1);
+            PrintHorizontalBorder(_rowsToTopMargin);
+        }
+
         /// <summary>
         /// Печать заголовков столбцов
         /// </summary>
-        private static void PrintTitle()
+        private static void PrintTitle(int rowToPrintHeader)
         {
-            Console.SetCursorPosition(3, 0);
+            Console.SetCursorPosition(3, rowToPrintHeader);
             Console.Write("Имя");
             PrintVerticalBorder(58);
 
-            Console.SetCursorPosition(60, 0);
+            Console.SetCursorPosition(60, rowToPrintHeader);
             Console.Write("Тип");
             PrintVerticalBorder(70);
 
-            Console.SetCursorPosition(72, 0);
+            Console.SetCursorPosition(72, rowToPrintHeader);
             Console.Write("Доступ");
             PrintVerticalBorder(84);
 
-            Console.SetCursorPosition(87, 0);
+            Console.SetCursorPosition(87, rowToPrintHeader);
             Console.Write("Дата создания");
             PrintVerticalBorder(102);
 
-            Console.SetCursorPosition(105, 0);
+            Console.SetCursorPosition(105, rowToPrintHeader);
             Console.Write("Размер");
         }
 
         /// <summary>
         /// Печать горинзонтальных линий
         /// </summary>
-        /// <param name="rNum"></param>
-        private static void PrintHorizontalBorder(int rNum)
+        /// <param name="rowsToTopMargin"></param>
+        private static void PrintHorizontalBorder(int rowsToTopMargin)
         {
             for (var i = 0; i < 120; i++)
             {
-                Console.SetCursorPosition(i, rNum);
+                Console.SetCursorPosition(i, rowsToTopMargin);
                 Console.Write('\u2014');
             }
         }
