@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using System.Resources;
-using System.Text;
-
 namespace ConsoleFileManager
 {
     class UIClass
@@ -16,6 +11,12 @@ namespace ConsoleFileManager
         public int CountRowToView { get; }
         public string JournalPath { get; }
 
+        private List<string> buffer;
+        private int numPage = 0;
+
+        private FilesClass _filesClass;
+        private FoldersClasses _foldersClasses;
+
         public UIClass()
         {
             Console.CursorVisible = false;
@@ -24,6 +25,24 @@ namespace ConsoleFileManager
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.BackgroundColor = ConsoleColor.Black;
 
+            Console.Title = "ConsoleFileManager";
+
+            ReadAppSettings();
+
+            PrintTitle();
+            PrintHorizontalBorder(1);
+
+            if (_userLastPath.Length > 0)
+                GetContent(_userLastPath);
+            else
+                GetContent(_firstPath);
+        }
+
+        /// <summary>
+        /// Чтение и назначение полям класса первичных настроек приложения
+        /// </summary>
+        private void ReadAppSettings()
+        {
             var appSettings = ConfigurationManager.AppSettings;
 
             if (appSettings.Count == 0)
@@ -85,7 +104,7 @@ namespace ConsoleFileManager
         {
             int rCounter = 2;
 
-            DirectoryInfo directoryInfo = new DirectoryInfo(folderPath);
+            DirectoryInfo directoryInfo = new DirectoryInfo(@"" + folderPath);
 
             //Печать информации о папках
             PrintInfoAboutContentFolders(directoryInfo.GetDirectories(), ref rCounter);
@@ -99,21 +118,20 @@ namespace ConsoleFileManager
 
         #region PrintInfoAboutContent
         /// <summary>
-        /// Вывод информации о подпапках в текущей папке
+        /// Метод вывода информации о подпапках работающий с классом FoldersClass
         /// </summary>
-        /// <param name="dInfo"> Массив содержащий информацию о подпапках</param>
+        /// <param name="dInfo"> Массив объектов о подпапках</param>
         /// <param name="rCounter"> Строка для вставки</param>
-        private void PrintInfoAboutContentFolders(DirectoryInfo[] dInfo, ref int rCounter)
+        private void PrintInfoAboutContentFolders2(DirectoryInfo[] dInfo, ref int rCounter)
         {
-            foreach (var dirInf in dInfo)
+            _foldersClasses = new FoldersClasses(dInfo);
+
+            foreach (var folder in _foldersClasses.ListFolderClass)
             {
                 Console.SetCursorPosition(3, rCounter);
-                Console.WriteLine(dirInf.Name);
+                Console.WriteLine(folder.FolderName);
 
-                Console.SetCursorPosition(87, rCounter);
-                Console.WriteLine(dirInf.CreationTime.ToShortDateString());
-
-                Console.SetCursorPosition(72, rCounter);
+                Console.SetCursorPosition(60, rCounter);
                 Console.WriteLine("Папка");
 
                 rCounter++;
@@ -121,26 +139,30 @@ namespace ConsoleFileManager
         }
 
         /// <summary>
-        /// Вывод информации о файлах в текущей папке
+        /// Вывод информации о файлах работая через собственный класс файлов
         /// </summary>
-        /// <param name="fInfos"> Массив содержащий информацию о файлах</param>
-        /// <param name="rCounter"> Строка для вставки</param>
-        private void PrintInfoAboutContentFiles(FileInfo[] fInfos, ref int rCounter)
+        /// <param name="fInfos"></param>
+        /// <param name="rCounter"></param>
+        private void PrintInfoAboutContentFiles2(FileInfo[] fInfos, ref int rCounter)
         {
-            foreach (var dirInf in fInfos)
+            _filesClass = new FilesClass(fInfos);
+
+            foreach (var fileInFolder in _filesClass.Files)
             {
                 Console.SetCursorPosition(3, rCounter);
-                Console.WriteLine(dirInf.Name);
-
-                Console.SetCursorPosition(87, rCounter);
-                Console.WriteLine(dirInf.CreationTime.ToShortDateString());
-
+                Console.WriteLine(fileInFolder.NameFile);
+                
+                Console.SetCursorPosition(60, rCounter);
+                Console.WriteLine(fileInFolder.FileExtension);
 
                 Console.SetCursorPosition(72, rCounter);
-                Console.WriteLine(dirInf.Extension);
+                Console.WriteLine(fileInFolder.FileAccesType);
+
+                Console.SetCursorPosition(87, rCounter);
+                Console.WriteLine(fileInFolder.DateCreate);
 
                 Console.SetCursorPosition(105, rCounter);
-                Console.WriteLine(dirInf.Length);
+                Console.WriteLine(fileInFolder.FileSyze);
 
                 rCounter++;
             }
@@ -155,17 +177,21 @@ namespace ConsoleFileManager
         {
             Console.SetCursorPosition(3, 0);
             Console.Write("Имя");
-            PrintVerticalBorder(69);
+            PrintVerticalBorder(58);
 
-            Console.SetCursorPosition(73, 0);
+            Console.SetCursorPosition(60, 0);
             Console.Write("Тип");
+            PrintVerticalBorder(70);
+
+            Console.SetCursorPosition(72, 0);
+            Console.Write("Доступ");
             PrintVerticalBorder(84);
 
-            Console.SetCursorPosition(88, 0);
+            Console.SetCursorPosition(87, 0);
             Console.Write("Дата создания");
             PrintVerticalBorder(102);
 
-            Console.SetCursorPosition(106, 0);
+            Console.SetCursorPosition(105, 0);
             Console.Write("Размер");
         }
 
@@ -188,12 +214,33 @@ namespace ConsoleFileManager
         /// <param name="cNum"></param>
         private void PrintVerticalBorder(int cNum)
         {
-            for (int i = 0; i < 41; i++)
+            for (var i = 0; i < 41; i++)
             {
                 Console.SetCursorPosition(cNum, i);
                 Console.Write('\u007C');
             }
         }
         #endregion
+        /// <summary>
+        /// Печать ограниченного кол-ва строк информации на странице
+        /// </summary>
+        private void PrintSectionContent()
+        {
+            if (buffer.Count == 0)
+                return;
+
+            int x = 0, y = 0;
+            var sNum = numPage * _countRowToView;
+
+            for (var i = sNum; i < (numPage + 1) * _countRowToView && i < buffer.Count; i++)
+            {
+                Console.SetCursorPosition(x + 3, y + 2);
+                Console.WriteLine(buffer[i]);
+                y++;
+            }
+
+            //Увеличение значения страницы с содержимым, которая отображена
+            numPage++;
+        }
     }
 }
