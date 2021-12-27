@@ -4,12 +4,12 @@ using System.Configuration;
 using System.IO;
 namespace ConsoleFileManager
 {
-    class UIClass
+    internal class UIClass
     {
-        private readonly string _firstPath;
-        private readonly string _userLastPath;
-        public int CountRowToView { get; }
-        public string JournalPath { get; }
+        private string _firstPath;
+        private string _userLastPath;
+        private int _countRowToView;
+        public string JournalPath { get; set; }
 
         private List<string> buffer;
         private int numPage = 0;
@@ -27,21 +27,18 @@ namespace ConsoleFileManager
 
             Console.Title = "ConsoleFileManager";
 
-            ReadAppSettings();
+            StartSettings();
 
             PrintTitle();
             PrintHorizontalBorder(1);
 
-            if (_userLastPath.Length > 0)
-                GetContent(_userLastPath);
-            else
-                GetContent(_firstPath);
+            GetContent(_userLastPath.Length > 0 ? _userLastPath : _firstPath);
         }
 
         /// <summary>
         /// Чтение и назначение полям класса первичных настроек приложения
         /// </summary>
-        private void ReadAppSettings()
+        private void StartSettings()
         {
             var appSettings = ConfigurationManager.AppSettings;
 
@@ -53,7 +50,7 @@ namespace ConsoleFileManager
             {
                 _firstPath = appSettings["FirstPath"];
                 _userLastPath = appSettings["LastUserPath"];
-                CountRowToView = Convert.ToInt32(appSettings["CountRowToView"]);
+                _countRowToView = Convert.ToInt32(appSettings["CountRowToView"]);
                 JournalPath = appSettings["JournalPath"];
             }
 
@@ -95,25 +92,35 @@ namespace ConsoleFileManager
             }
         }
         #endregion
-        
+
         /// <summary>
         /// Получение первичной информации о содержимом текущей папки
         /// </summary>
         /// <param name="folderPath"> Путь к текущей папке</param>
         private void GetContent(string folderPath)
         {
-            int rCounter = 2;
+            var rCounter = 2;
 
-            DirectoryInfo directoryInfo = new DirectoryInfo(@"" + folderPath);
+            var directoryInfo = new DirectoryInfo(@"" + folderPath);
 
             //Печать информации о папках
             PrintInfoAboutContentFolders(directoryInfo.GetDirectories(), ref rCounter);
 
             //Печать информации о файлах
-            FileInfo[] fileInfos = directoryInfo.GetFiles();
+            var fileInfos = directoryInfo.GetFiles();
             PrintInfoAboutContentFiles(fileInfos, ref rCounter);
-            
+
             Console.ReadLine();
+        }
+
+        private static void PrintInfoAboutContentFiles(FileInfo[] fileInfos, ref int rCounter)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void PrintInfoAboutContentFolders(DirectoryInfo[] getDirectories, ref int rCounter)
+        {
+            throw new NotImplementedException();
         }
 
         #region PrintInfoAboutContent
@@ -151,7 +158,7 @@ namespace ConsoleFileManager
             {
                 Console.SetCursorPosition(3, rCounter);
                 Console.WriteLine(fileInFolder.NameFile);
-                
+
                 Console.SetCursorPosition(60, rCounter);
                 Console.WriteLine(fileInFolder.FileExtension);
 
@@ -173,7 +180,7 @@ namespace ConsoleFileManager
         /// <summary>
         /// Печать заголовков столбцов
         /// </summary>
-        private void PrintTitle()
+        private static void PrintTitle()
         {
             Console.SetCursorPosition(3, 0);
             Console.Write("Имя");
@@ -199,9 +206,9 @@ namespace ConsoleFileManager
         /// Печать горинзонтальных линий
         /// </summary>
         /// <param name="rNum"></param>
-        private void PrintHorizontalBorder(int rNum)
+        private static void PrintHorizontalBorder(int rNum)
         {
-            for (int i = 0; i < 120; i++)
+            for (var i = 0; i < 120; i++)
             {
                 Console.SetCursorPosition(i, rNum);
                 Console.Write('\u2014');
@@ -212,7 +219,7 @@ namespace ConsoleFileManager
         /// Печать вертикальных линий
         /// </summary>
         /// <param name="cNum"></param>
-        private void PrintVerticalBorder(int cNum)
+        private static void PrintVerticalBorder(int cNum)
         {
             for (var i = 0; i < 41; i++)
             {

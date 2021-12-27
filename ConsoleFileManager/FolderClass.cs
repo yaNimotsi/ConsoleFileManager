@@ -138,10 +138,11 @@ namespace ConsoleFileManager
                         userVal = Console.ReadLine();
                     }
 
-                if (userVal == "Y")
-                    DeleteFolder(sourcePath, true);
-                else
-                    Console.WriteLine("Удаление отменено");
+                    if (userVal == "Y")
+                        DeleteFolder(sourcePath, true);
+                    else
+                        Console.WriteLine("Удаление отменено");
+                }
             }
             else
             {

@@ -5,7 +5,7 @@ namespace ConsoleFileManager
 {
     class MainClass
     {
-        static void Main(string[] args)
+        private static void Main()
         {
             var newUI = new UIClass();
 

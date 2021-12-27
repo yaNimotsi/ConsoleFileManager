@@ -91,7 +91,6 @@ namespace ConsoleFileManager
         /// <param name="newPath">Путь, куда файл будет скопирован</param>
         public void CopyFile(string currentPath, string newPath)
         {
-            string userVal;
             if (File.Exists(newPath))
             {
                 Console.WriteLine("Файл, по новому пути, уже существует. Перезаписать его?");
