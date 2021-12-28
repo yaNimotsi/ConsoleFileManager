@@ -68,6 +68,11 @@ namespace ConsoleFileManager
 
         internal static void SetCursorToCommandPosition()
         {
+            for (int i = ColumnToCommand; i < 120; i++)
+            {
+                Console.SetCursorPosition(i, RowToCommand);
+                Console.Write(" ");
+            }
             Console.SetCursorPosition(0, RowToCommand);
             Console.Write("Введите команду:");
             Console.SetCursorPosition(ColumnToCommand, RowToCommand);

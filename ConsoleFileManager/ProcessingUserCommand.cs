@@ -14,7 +14,7 @@ namespace ConsoleFileManager
         private void GetUserCommand()
         {
             var command = "";
-            while (!string.Equals(command, "Выход"))
+            while (!string.Equals(command.ToLower(), "Выход".ToLower()))
             {
                 command = Console.ReadLine();
                 UiClass.SetCursorToCommandPosition();
