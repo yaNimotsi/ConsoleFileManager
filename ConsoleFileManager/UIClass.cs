@@ -22,7 +22,7 @@ namespace ConsoleFileManager
 
         public UiClass()
         {
-            Console.CursorVisible = false;
+            //Console.CursorVisible = false;
 
             Console.SetWindowSize(120, 41);
             Console.SetBufferSize(120, 41);
@@ -61,9 +61,15 @@ namespace ConsoleFileManager
 
             PrintSectionContent();
 
-            //var rowToPrintData = 2;
-            //PrintContentInfo(ref rowToPrintData);
+            SetCursorToCommandPosition();
 
+            var processingUserCommand = new ProcessingUserCommand();
+        }
+
+        internal static void SetCursorToCommandPosition()
+        {
+            Console.SetCursorPosition(0, RowToCommand);
+            Console.Write("Введите команду:");
             Console.SetCursorPosition(ColumnToCommand, RowToCommand);
         }
 
@@ -107,35 +113,7 @@ namespace ConsoleFileManager
         }
         #endregion
 
-        /*/// <summary>
-        /// Печать информации о содержимом папки
-        /// </summary>
-        /// <param name="rCounter"> Номер строки для печати</param>
-        private void PrintContentInfo(ref int rCounter)
-        {
-            foreach (var subElement in _content)
-            {
-                Console.SetCursorPosition(3, rCounter);
-                Console.WriteLine(subElement.NameElement);
-
-                Console.SetCursorPosition(60, rCounter);
-                Console.WriteLine(subElement.TypeElement);
-
-                Console.SetCursorPosition(72, rCounter);
-                Console.WriteLine(subElement.TypeAccessToElement ? "" : "ReadOnly");
-
-                Console.SetCursorPosition(85, rCounter);
-                Console.WriteLine(subElement.DateCreateElement);
-
-                Console.SetCursorPosition(108, rCounter);
-                Console.WriteLine(subElement.ElementSize == 0 ? "" : subElement.ElementSize.ToString());
-
-                rCounter++;
-            }
-        }
-        */
-
-        private void PrintContentInfo(List<SubElement> subElements)
+        private static void PrintContentInfo(List<SubElement> subElements)
         {
             var rowToPrint = 2;
 
@@ -252,7 +230,7 @@ namespace ConsoleFileManager
 
             var realEndPosition = endIndex > _content.Count ? _content.Count - 1 : endIndex;
 
-            for (int i = startIndex; i <= realEndPosition; i++)
+            for (var i = startIndex; i <= realEndPosition; i++)
             {
                 _contentToPrint.Add(_content[i]);
             }
