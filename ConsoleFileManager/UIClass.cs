@@ -1,34 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
 namespace ConsoleFileManager
 {
-    internal class UIClass
+    internal class UiClass
     {
+        private const int RowToCommand = 39;
+        private const int ColumnToCommand = 17;
+
         private string _firstPath;
         private string _userLastPath;
         private int _countRowToView;
         private static int _rowsToTopMargin;
-        private const int _rowToCommand = 39;
-        private const int _columnToCommand = 17;
+        private static int _countRowOnPage;
         //public string JournalPath { get; set; }
 
-        private IEnumerable<DirectoryInfo> _subFolders; 
-        private IEnumerable<FileInfo> _subFiles; 
+        private List<SubElement> _content;
+        private List<SubElement> _contentToPrint;
 
-        private List<string> buffer;
-        private int numPage = 0;
-        
-        
-        public UIClass()
+        private int _numPage = 0;
+
+        public UiClass()
         {
             Console.CursorVisible = false;
+
             Console.SetWindowSize(120, 41);
             Console.SetBufferSize(120, 41);
+
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.BackgroundColor = ConsoleColor.Black;
-
+            
             Console.Title = "ConsoleFileManager";
 
             StartSettings();
@@ -50,21 +51,30 @@ namespace ConsoleFileManager
                 _firstPath = appSettings["FirstPath"];
                 _userLastPath = appSettings["LastUserPath"];
                 _countRowToView = Convert.ToInt32(appSettings["CountRowToView"]);
+                _countRowOnPage = Convert.ToInt32(appSettings["CountRowOnPage"]);
                 //JournalPath = appSettings["JournalPath"];
             }
 
-            _subFolders = FolderContents.GetSubFolders(_firstPath);
-            _subFiles = FolderContents.GetSubFiles(_firstPath);
-
             PrintTable();
 
-            var a = 2;
+            GetContent(_firstPath);
 
-            PrintInfoAboutContentFolders(ref a);
-            PrintInfoAboutContentFiles(ref a);
-            Console.SetCursorPosition(_columnToCommand, _rowToCommand);
+            PrintSectionContent(0, 9);
 
-            //GetContent(_userLastPath.Length > 0 ? _userLastPath : _firstPath);
+            //var rowToPrintData = 2;
+            //PrintContentInfo(ref rowToPrintData);
+
+            Console.SetCursorPosition(ColumnToCommand, RowToCommand);
+        }
+
+        /// <summary>
+        /// Получение содержимого папки
+        /// </summary>
+        /// <param name="pathToDirectory"> Путь к папке</param>
+        private void GetContent(string pathToDirectory)
+        {
+            var subElements = new SubElements(pathToDirectory);
+            _content = subElements.Contents;
         }
 
         #region UpadteAppConfigFile
@@ -97,57 +107,61 @@ namespace ConsoleFileManager
         }
         #endregion
 
-        
-        private void PrintInfoAboutContentFolders(ref int rCounter)
+        /// <summary>
+        /// Печать информации о содержимом папки
+        /// </summary>
+        /// <param name="rCounter"> Номер строки для печати</param>
+        private void PrintContentInfo(ref int rCounter)
         {
-            foreach (var folder in _subFolders)
+            foreach (var subElement in _content)
             {
                 Console.SetCursorPosition(3, rCounter);
-                Console.WriteLine(folder.Name);
+                Console.WriteLine(subElement.NameElement);
 
                 Console.SetCursorPosition(60, rCounter);
-                Console.WriteLine("Папка");
-
-                rCounter++;
-            }
-        }
-
-        private void PrintInfoAboutContentFiles(ref int rCounter)
-        {
-            foreach (var fileInFolder in _subFiles)
-            {
-                Console.SetCursorPosition(3, rCounter);
-                var nameFile = fileInFolder.Name;
-                if (nameFile.Length > 50)
-                {
-                    nameFile = nameFile.Remove(50) + "...";
-                }
-                Console.WriteLine(nameFile);
-
-                Console.SetCursorPosition(60, rCounter);
-                Console.WriteLine(fileInFolder.Extension);
+                Console.WriteLine(subElement.TypeElement);
 
                 Console.SetCursorPosition(72, rCounter);
-
-                if ((fileInFolder.Attributes & FileAttributes.ReadOnly) != 0)
-                {
-                    Console.WriteLine("ReadOnly");
-                }
-
-                //Console.WriteLine((fileInFolder.Attributes & FileAttributes.ReadOnly) != 0  );
+                Console.WriteLine(subElement.TypeAccessToElement ? "" : "ReadOnly");
 
                 Console.SetCursorPosition(85, rCounter);
-                Console.WriteLine(fileInFolder.CreationTime);
+                Console.WriteLine(subElement.DateCreateElement);
 
                 Console.SetCursorPosition(108, rCounter);
-                Console.WriteLine(fileInFolder.Length);
+                Console.WriteLine(subElement.ElementSize == 0 ? "" : subElement.ElementSize.ToString());
 
                 rCounter++;
             }
         }
 
-        #region printTableBorder
+        private void PrintContentInfo(List<SubElement> subElements)
+        {
+            var rowToPrint = 2;
 
+            foreach (var subElement in subElements)
+            {
+                Console.SetCursorPosition(3, rowToPrint);
+                Console.WriteLine(subElement.NameElement);
+
+                Console.SetCursorPosition(60, rowToPrint);
+                Console.WriteLine(subElement.TypeElement);
+
+                Console.SetCursorPosition(72, rowToPrint);
+                Console.WriteLine(subElement.TypeAccessToElement ? "" : "ReadOnly");
+
+                Console.SetCursorPosition(85, rowToPrint);
+                Console.WriteLine(subElement.DateCreateElement);
+
+                Console.SetCursorPosition(108, rowToPrint);
+                Console.WriteLine(subElement.ElementSize == 0 ? "" : subElement.ElementSize.ToString());
+
+                rowToPrint++;
+            }
+        }
+
+        /// <summary>
+        /// Функция для инициализации печати рамок таблицы
+        /// </summary>
         private static void PrintTable()
         {
             if (_rowsToTopMargin == 0) _rowsToTopMargin = 1;
@@ -180,7 +194,7 @@ namespace ConsoleFileManager
             Console.SetCursorPosition(108, rowToPrintHeader);
             Console.Write("Размер");
 
-            Console.SetCursorPosition(0, _rowToCommand);
+            Console.SetCursorPosition(0, RowToCommand);
             Console.Write("Введите команду:");
         }
 
@@ -194,7 +208,7 @@ namespace ConsoleFileManager
             {
                 Console.SetCursorPosition(i, rowsToTopMargin);
                 Console.Write('\u2014');
-                Console.SetCursorPosition(i, _rowToCommand - 1);
+                Console.SetCursorPosition(i, RowToCommand - 1);
                 Console.Write('\u2014');
             }
         }
@@ -211,14 +225,24 @@ namespace ConsoleFileManager
                 Console.Write('\u007C');
             }
         }
-        #endregion
 
         /// <summary>
         /// Печать ограниченного кол-ва строк информации на странице
         /// </summary>
-        private void PrintSectionContent()
+        private void PrintSectionContent(int startPosition, int endPosition)
         {
-            if (buffer.Count == 0)
+            var realEndPosition = endPosition > _content.Count ? _content.Count : endPosition;
+
+            _contentToPrint = new List<SubElement>();
+
+            for (int i = startPosition; i <= realEndPosition; i++)
+            {
+                _contentToPrint.Add(_content[i]);
+            }
+
+            PrintContentInfo(_contentToPrint);
+
+            /*if (buffer.Count == 0)
                 return;
 
             int x = 0, y = 0;
@@ -232,7 +256,7 @@ namespace ConsoleFileManager
             }
 
             //Увеличение значения страницы с содержимым, которая отображена
-            numPage++;
+            numPage++;*/
         }
     }
 }

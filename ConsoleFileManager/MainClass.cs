@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace ConsoleFileManager
 {
@@ -7,7 +6,7 @@ namespace ConsoleFileManager
     {
         private static void Main()
         {
-            var newUI = new UIClass();
+            var newUi = new UiClass();
 
             Console.ReadLine();
         }
