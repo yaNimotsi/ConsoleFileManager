@@ -18,7 +18,7 @@ namespace ConsoleFileManager
         private List<SubElement> _content;
         private List<SubElement> _contentToPrint;
 
-        private int _numPage = 0;
+        private int _numPage = 1;
 
         public UiClass()
         {
@@ -59,7 +59,7 @@ namespace ConsoleFileManager
 
             GetContent(_firstPath);
 
-            PrintSectionContent(0, 9);
+            PrintSectionContent();
 
             //var rowToPrintData = 2;
             //PrintContentInfo(ref rowToPrintData);
@@ -107,7 +107,7 @@ namespace ConsoleFileManager
         }
         #endregion
 
-        /// <summary>
+        /*/// <summary>
         /// Печать информации о содержимом папки
         /// </summary>
         /// <param name="rCounter"> Номер строки для печати</param>
@@ -133,6 +133,7 @@ namespace ConsoleFileManager
                 rCounter++;
             }
         }
+        */
 
         private void PrintContentInfo(List<SubElement> subElements)
         {
@@ -229,34 +230,32 @@ namespace ConsoleFileManager
         /// <summary>
         /// Печать ограниченного кол-ва строк информации на странице
         /// </summary>
-        private void PrintSectionContent(int startPosition, int endPosition)
+        private void PrintSectionContent()
         {
-            var realEndPosition = endPosition > _content.Count ? _content.Count : endPosition;
+            GetPrintedElements();
 
+            if (_contentToPrint.Count > 0)
+            {
+                PrintContentInfo(_contentToPrint);
+            }
+        }
+
+        /// <summary>
+        /// Получение коллекции для вывода пользователю
+        /// </summary>
+        private void GetPrintedElements()
+        {
             _contentToPrint = new List<SubElement>();
 
-            for (int i = startPosition; i <= realEndPosition; i++)
+            var startIndex = _numPage * _countRowOnPage;
+            var endIndex = startIndex + _countRowOnPage - 1;
+
+            var realEndPosition = endIndex > _content.Count ? _content.Count - 1 : endIndex;
+
+            for (int i = startIndex; i <= realEndPosition; i++)
             {
                 _contentToPrint.Add(_content[i]);
             }
-
-            PrintContentInfo(_contentToPrint);
-
-            /*if (buffer.Count == 0)
-                return;
-
-            int x = 0, y = 0;
-            var sNum = numPage * _countRowToView;
-
-            for (var i = sNum; i < (numPage + 1) * _countRowToView && i < buffer.Count; i++)
-            {
-                Console.SetCursorPosition(x + 3, y + 2);
-                Console.WriteLine(buffer[i]);
-                y++;
-            }
-
-            //Увеличение значения страницы с содержимым, которая отображена
-            numPage++;*/
         }
     }
 }
