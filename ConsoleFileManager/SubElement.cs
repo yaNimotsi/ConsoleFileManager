@@ -19,22 +19,28 @@ namespace ConsoleFileManager
 
         public SubElement(FileInfo fileInfo)
         {
-            NameElement = CheckLengthSize(fileInfo.Name , 50);
+            NameElement = CheckLengthSize(fileInfo.Name , 47);
             TypeElement = CheckLengthSize(fileInfo.Extension , 6);
             TypeAccessToElement = fileInfo.IsReadOnly;
             DateCreateElement = fileInfo.CreationTime;
-            ElementSize = fileInfo.Length;
+            ElementSize = ConvertBiteToKiloByte(fileInfo.Length);
             PathToElement = fileInfo.FullName;
         }
         public SubElement(DirectoryInfo directoryInfo)
         {
-            NameElement = CheckLengthSize(directoryInfo.Name, 50);
+            NameElement = CheckLengthSize(directoryInfo.Name, 47);
             TypeElement = "Folder";
             TypeAccessToElement = GetFolderAccessType(directoryInfo.Attributes);
             DateCreateElement = directoryInfo.CreationTime;
             PathToElement = directoryInfo.FullName;
         }
 
+        /// <summary>
+        /// Если длина имени выше указанной, то обрезаем
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="maxLength"></param>
+        /// <returns></returns>
         private static string CheckLengthSize(string name , int maxLength)
         {
             if (name.Length > maxLength)
@@ -44,9 +50,26 @@ namespace ConsoleFileManager
             return name;
         }
 
+        /// <summary>
+        /// Получение типа доступа к папке
+        /// </summary>
+        /// <param name="attributes"></param>
+        /// <returns></returns>
         private static bool GetFolderAccessType(FileAttributes attributes)
         {
             return (attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly;
+        }
+
+        /// <summary>
+        /// Преобразование размера документа из bite в killoByte
+        /// </summary>
+        /// <param name="elementSizeInBite"></param>
+        /// <returns></returns>
+        private static long ConvertBiteToKiloByte(long elementSizeInBite)
+        {
+            if (elementSizeInBite == 0) return 0;
+
+            return elementSizeInBite / (8 * 1024);
         }
     }
 }

@@ -7,18 +7,34 @@ namespace ConsoleFileManager
     {
         private const int RowToCommand = 39;
         private const int ColumnToCommand = 17;
+        public const string WindowName = "ConsoleFileManager";
 
         private string _firstPath;
-        private string _userLastPath;
-        private int _countRowToView;
+        private static string _userLastPath;
+
         private static int _rowsToTopMargin;
-        private static int _countRowOnPage;
+
         //public string JournalPath { get; set; }
+        
+        private static List<SubElement> _content;
+        private static List<SubElement> _contentToPrint;
 
-        private List<SubElement> _content;
-        private List<SubElement> _contentToPrint;
+        private static int _numPage;
+        private static int _countRowOnPage;
+        
+        public static string UserLastPath
+        {
+            get => _userLastPath;
+            set => _userLastPath = value;
+        }
+        public static List<SubElement> Content => _content;
+        public static int CountRowOnPage => _countRowOnPage;
 
-        private int _numPage = 1;
+        public static int NumPage
+        {
+            get => _numPage;
+            set => _numPage = value;
+        }
 
         public UiClass()
         {
@@ -29,8 +45,8 @@ namespace ConsoleFileManager
 
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.BackgroundColor = ConsoleColor.Black;
-            
-            Console.Title = "ConsoleFileManager";
+
+            Console.Title = WindowName;
 
             StartSettings();
         }
@@ -50,18 +66,13 @@ namespace ConsoleFileManager
             {
                 _firstPath = appSettings["FirstPath"];
                 _userLastPath = appSettings["LastUserPath"];
-                _countRowToView = Convert.ToInt32(appSettings["CountRowToView"]);
-                _countRowOnPage = Convert.ToInt32(appSettings["CountRowOnPage"]);
+                _countRowOnPage = Convert.ToInt32(appSettings["_countRowOnPage"]);
                 //JournalPath = appSettings["JournalPath"];
             }
-
-            PrintTable();
 
             GetContent(_firstPath);
 
             PrintSectionContent();
-
-            SetCursorToCommandPosition();
 
             var processingUserCommand = new ProcessingUserCommand();
         }
@@ -82,9 +93,13 @@ namespace ConsoleFileManager
         /// Получение содержимого папки
         /// </summary>
         /// <param name="pathToDirectory"> Путь к папке</param>
-        private void GetContent(string pathToDirectory)
+        public static void GetContent(string pathToDirectory)
         {
             var subElements = new SubElements(pathToDirectory);
+
+            _content = new List<SubElement>();
+            _content.Clear();
+
             _content = subElements.Contents;
         }
 
@@ -121,10 +136,13 @@ namespace ConsoleFileManager
         private static void PrintContentInfo(List<SubElement> subElements)
         {
             var rowToPrint = 2;
-
+            var numPosition = 0;
             foreach (var subElement in subElements)
             {
-                Console.SetCursorPosition(3, rowToPrint);
+                Console.SetCursorPosition(1, rowToPrint);
+                Console.WriteLine((_numPage * _countRowOnPage) + 1 + numPosition++);
+
+                Console.SetCursorPosition(6, rowToPrint);
                 Console.WriteLine(subElement.NameElement);
 
                 Console.SetCursorPosition(60, rowToPrint);
@@ -159,7 +177,11 @@ namespace ConsoleFileManager
         /// </summary>
         private static void PrintTitle(int rowToPrintHeader)
         {
-            Console.SetCursorPosition(3, rowToPrintHeader);
+            Console.SetCursorPosition(1, rowToPrintHeader);
+            Console.Write("№");
+            PrintVerticalBorder(4);
+
+            Console.SetCursorPosition(6, rowToPrintHeader);
             Console.Write("Имя");
             PrintVerticalBorder(58);
 
@@ -176,7 +198,7 @@ namespace ConsoleFileManager
             PrintVerticalBorder(105);
 
             Console.SetCursorPosition(108, rowToPrintHeader);
-            Console.Write("Размер");
+            Console.Write("Размер (KБ)");
 
             Console.SetCursorPosition(0, RowToCommand);
             Console.Write("Введите команду:");
@@ -191,10 +213,30 @@ namespace ConsoleFileManager
             for (var i = 0; i < 120; i++)
             {
                 Console.SetCursorPosition(i, rowsToTopMargin);
-                Console.Write('\u2014');
+                Console.Write('-');
                 Console.SetCursorPosition(i, RowToCommand - 1);
-                Console.Write('\u2014');
+                Console.Write('-');
             }
+
+            Console.SetCursorPosition(58, rowsToTopMargin);
+            Console.Write('+');
+            Console.SetCursorPosition(58, RowToCommand - 1);
+            Console.Write('+');
+
+            Console.SetCursorPosition(70, rowsToTopMargin);
+            Console.Write('+');
+            Console.SetCursorPosition(70, RowToCommand - 1);
+            Console.Write('+');
+
+            Console.SetCursorPosition(84, rowsToTopMargin);
+            Console.Write('+');
+            Console.SetCursorPosition(84, RowToCommand - 1);
+            Console.Write('+');
+
+            Console.SetCursorPosition(105, rowsToTopMargin);
+            Console.Write('+');
+            Console.SetCursorPosition(105, RowToCommand - 1);
+            Console.Write('+');
         }
 
         /// <summary>
@@ -206,29 +248,36 @@ namespace ConsoleFileManager
             for (var i = 0; i < 39; i++)
             {
                 Console.SetCursorPosition(cNum, i);
-                Console.Write('\u007C');
+                Console.Write('|');
             }
         }
 
         /// <summary>
         /// Печать ограниченного кол-ва строк информации на странице
         /// </summary>
-        private void PrintSectionContent()
+        public static void PrintSectionContent()
         {
-            GetPrintedElements();
+            Console.Clear();
+
+            PrintTable();
+
+            GetElementsToPrint();
 
             if (_contentToPrint.Count > 0)
             {
                 PrintContentInfo(_contentToPrint);
             }
+
+            SetCursorToCommandPosition();
         }
 
         /// <summary>
         /// Получение коллекции для вывода пользователю
         /// </summary>
-        private void GetPrintedElements()
+        private static void GetElementsToPrint()
         {
             _contentToPrint = new List<SubElement>();
+            _contentToPrint.Clear();
 
             var startIndex = _numPage * _countRowOnPage;
             var endIndex = startIndex + _countRowOnPage - 1;

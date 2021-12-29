@@ -22,7 +22,8 @@ namespace ConsoleFileManager
             
             var directories = Directory.EnumerateDirectories(pathToMainMainFolder);
 
-            
+            SubDirectoriesInfo.Clear();
+
             foreach (var pathToDirectory in directories)
             {
                 SubDirectoriesInfo.Add(new DirectoryInfo(pathToDirectory));
@@ -44,6 +45,8 @@ namespace ConsoleFileManager
             if (File.Exists(pathToMainMainFolder)) return null;
 
             var files = Directory.EnumerateFiles(pathToMainMainFolder);
+
+            SubFilesInfo.Clear();
 
             foreach (var pathToFile in files)
             {
