@@ -282,7 +282,7 @@ namespace ConsoleFileManager
             var startIndex = _numPage * _countRowOnPage;
             var endIndex = startIndex + _countRowOnPage - 1;
 
-            var realEndPosition = endIndex > _content.Count ? _content.Count - 1 : endIndex;
+            var realEndPosition = endIndex >= _content.Count ? _content.Count - 1 : endIndex;
 
             for (var i = startIndex; i <= realEndPosition; i++)
             {
