@@ -77,7 +77,7 @@ namespace ConsoleFileManager
             var processingUserCommand = new ProcessingUserCommand();
         }
 
-        internal static void SetCursorToCommandPosition()
+        internal static void SetCursorToCommandPosition(string text)
         {
             for (int i = ColumnToCommand; i < 120; i++)
             {
@@ -85,8 +85,20 @@ namespace ConsoleFileManager
                 Console.Write(" ");
             }
             Console.SetCursorPosition(0, RowToCommand);
-            Console.Write("Введите команду:");
+            Console.Write(text);
             Console.SetCursorPosition(ColumnToCommand, RowToCommand);
+        }
+
+        internal static void SetCursorToCommandPosition(string text, int columnToNewCommand)
+        {
+            for (int i = 0; i < 120; i++)
+            {
+                Console.SetCursorPosition(i, RowToCommand);
+                Console.Write(" ");
+            }
+            Console.SetCursorPosition(0, RowToCommand);
+            Console.Write(text);
+            Console.SetCursorPosition(columnToNewCommand, RowToCommand);
         }
 
         /// <summary>
@@ -268,7 +280,7 @@ namespace ConsoleFileManager
                 PrintContentInfo(_contentToPrint);
             }
 
-            SetCursorToCommandPosition();
+            SetCursorToCommandPosition("Введите команду:");
         }
 
         /// <summary>
@@ -288,6 +300,19 @@ namespace ConsoleFileManager
             {
                 _contentToPrint.Add(_content[i]);
             }
+        }
+
+        internal static void PrintNegativeMessage(string message)
+        {
+            SetCursorToCommandPosition("Введите команду:");
+            Console.Write(message);
+            Console.ReadLine();
+        }
+
+        internal static string PrintMessageToUser(string message)
+        {
+            SetCursorToCommandPosition(message, message.Length+2);
+            return Console.ReadLine();
         }
     }
 }

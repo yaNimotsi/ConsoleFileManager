@@ -19,8 +19,8 @@ namespace ConsoleFileManager
             var command = "";
             while (command != null && !string.Equals(command.ToLower(), "Выход".ToLower()))
             {
-                UiClass.SetCursorToCommandPosition();
-                command = Console.ReadLine()?.ToLower();
+                UiClass.SetCursorToCommandPosition("Введите команду:");
+                command = Console.ReadLine()?.ToLower().Trim();
                 DetectCommand(command);
             }
         }
@@ -35,7 +35,7 @@ namespace ConsoleFileManager
 
             if (arrFromCommand.Length <= 0)
             {
-                UiClass.SetCursorToCommandPosition();
+                UiClass.SetCursorToCommandPosition("Введите команду:");
                 Console.Write("Недопустимая команда");
                 Console.ReadLine();
                 return;
@@ -43,16 +43,17 @@ namespace ConsoleFileManager
 
             switch (arrFromCommand[0])
             {
-                case "вперед":
+                case "next":
                     IsMaybeMore();
                     break;
-                case "назад":
+                case "back":
                     IsMaybeLess();
                     break;
                 case "cd":
                     GoToNewDirectory(command);
                     break;
                 case "copy":
+                    CopyDirectory(command);
                     break;
                 case "mkdir":
                     MakeNewDirectory(arrFromCommand);
@@ -65,9 +66,7 @@ namespace ConsoleFileManager
                 case "move":
                     break;
                 default:
-                    UiClass.SetCursorToCommandPosition();
-                    Console.Write("Недопустимая команда");
-                    Console.ReadLine();
+                    UiClass.PrintNegativeMessage("Недопустимая команда");
                     break;
             }
         }
@@ -80,7 +79,7 @@ namespace ConsoleFileManager
         {
             if (string.IsNullOrWhiteSpace(userCommand))
             {
-                UiClass.SetCursorToCommandPosition();
+                UiClass.SetCursorToCommandPosition("Введите команду:");
                 Console.Write("Недопустимая команда");
             }
             else
@@ -91,7 +90,7 @@ namespace ConsoleFileManager
 
                 if (result) return;
 
-                UiClass.SetCursorToCommandPosition();
+                UiClass.SetCursorToCommandPosition("Введите команду:");
                 Console.Write("Недопустимая команда");
                 Console.ReadLine();
             }
@@ -123,7 +122,7 @@ namespace ConsoleFileManager
         /// <returns></returns>
         private static bool GoToSubDirectory(string nameSubDirectory)
         {
-            var fullPath = UiClass.UserLastPath + @"\" + nameSubDirectory;
+            var fullPath = Path.Combine(UiClass.UserLastPath, nameSubDirectory);
 
             if (!Directory.Exists(fullPath)) return false;
 
@@ -144,7 +143,7 @@ namespace ConsoleFileManager
         {
             if (UiClass.NumPage - 1 < 0)
             {
-                UiClass.SetCursorToCommandPosition();
+                UiClass.SetCursorToCommandPosition("Введите команду:");
                 Console.Write("Куда уж меньше, завязывай ;)");
                 Console.ReadLine();
             }
@@ -162,7 +161,7 @@ namespace ConsoleFileManager
         {
             if (UiClass.NumPage + 1 >= UiClass.Content.Count / UiClass.CountRowOnPage + (UiClass.Content.Count % UiClass.CountRowOnPage > 0 ? 1 : 0))
             {
-                UiClass.SetCursorToCommandPosition();
+                UiClass.SetCursorToCommandPosition("Введите команду:");
                 Console.Write("Куда уж дальше, там бесконечность :Р");
                 Console.ReadLine();
             }
@@ -186,7 +185,7 @@ namespace ConsoleFileManager
                 fullPath += command[i];
             }
 
-            if (!fullPath.Contains((char)92))
+            if (!fullPath.Contains(Path.DirectorySeparatorChar))
             {
                 fullPath += UiClass.UserLastPath;
             }
@@ -232,7 +231,7 @@ namespace ConsoleFileManager
                 fullPath += command[i];
             }
 
-            if (!fullPath.Contains((char)92))
+            if (!fullPath.Contains(Path.DirectorySeparatorChar))
             {
                 fullPath += UiClass.UserLastPath;
             }
@@ -269,9 +268,42 @@ namespace ConsoleFileManager
         /// <param name="message"> Сообщение для вывода</param>
         private static void PrintNegativeMessage(string message)
         {
-            UiClass.SetCursorToCommandPosition();
+            UiClass.SetCursorToCommandPosition("Введите команду:");
             Console.Write(message);
             Console.ReadLine();
+        }
+
+        private static void CopyDirectory(string command)
+        {
+            var negativeMessage = "Указанный путь не найден!";
+            var currentDirectoryPath = command.TrimStart('c','o','p','y').Trim();
+
+            if (IsDirectoryExist(currentDirectoryPath))
+            {
+                var newPath = UiClass.PrintMessageToUser("Укажите куда копировать:");
+                if (IsDirectoryExist(newPath))
+                {
+                    
+                }
+                else
+                {
+                    PrintNegativeMessage(negativeMessage);
+                }
+            }
+            else
+            {
+                PrintNegativeMessage(negativeMessage);
+            }
+        }
+
+        private static void CopyDirectoryes()
+        {
+
+        }
+
+        private static bool IsDirectoryExist(string path)
+        {
+            return Directory.Exists(path);
         }
     }
 }
