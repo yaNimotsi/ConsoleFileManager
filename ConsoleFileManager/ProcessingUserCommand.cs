@@ -79,67 +79,8 @@ namespace ConsoleFileManager
         /// <param name="userCommand"> Указанный пользователем путь</param>
         private static void GoToNewDirectory(string userCommand)
         {
-            if (string.IsNullOrWhiteSpace(userCommand))
-            {
-                UiClass.SetCursorToCommandPosition("Введите команду:");
-                Console.Write("Недопустимая команда");
-                return;
-            }
-
-            var newPath = userCommand.TrimStart('c', 'd').Trim();
-
-            var result = newPath.Contains((char)92) ? GoToNewUserDirectory(newPath) : GoToSubDirectory(newPath);
-
-            if (result) return;
-
-            UiClass.SetCursorToCommandPosition("Введите команду:");
-            Console.Write("Недопустимая команда");
-            Console.ReadLine();
-
-        }
-
-        /// <summary>
-        /// Переход в дирректорию по указанному пользователем пути
-        /// </summary>
-        /// <param name="newPath">Полный путь к папке</param>
-        /// <returns></returns>
-        private static bool GoToNewUserDirectory(string newPath)
-        {
-            if (!Directory.Exists(newPath)) return false;
-
-            UpdateConsoleWindow(newPath);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Переход к под папке текущей дирректории
-        /// </summary>
-        /// <param name="nameSubDirectory">Название под дирректории</param>
-        /// <returns></returns>
-        private static bool GoToSubDirectory(string nameSubDirectory)
-        {
-            var newPath = Path.Combine(UiClass.UserLastPath, nameSubDirectory);
-
-            if (!Directory.Exists(newPath)) return false;
-
-            UpdateConsoleWindow(newPath);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Update data in console
-        /// </summary>
-        /// <param name="newPath"></param>
-        private static void UpdateConsoleWindow(string newPath)
-        {
-            Console.Title = UiClass.WindowName + " Путь:" + newPath;
-            UiClass.NumPage = 0;
-            UiClass.UserLastPath = newPath;
-
-            UiClass.GetContent(UiClass.UserLastPath);
-            UiClass.PrintSectionContent();
+            var operationWithDirectory = new OperationWithDirectory();
+            operationWithDirectory.GoToDirectory(userCommand);
         }
 
         /// <summary>
@@ -298,6 +239,8 @@ namespace ConsoleFileManager
             {
                 var newPath = UiClass.PrintMessageToUser("Укажите куда копировать:").Trim();
 
+                newPath = newPath.Contains(Path.DirectorySeparatorChar) ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
+
                 if (IsDirectoryExist(newPath))
                 {
                     PrintNegativeMessage("По указанному пути папка уже существует");
@@ -328,6 +271,8 @@ namespace ConsoleFileManager
             {
                 var newPath = UiClass.PrintMessageToUser("Укажите куда переместить:").Trim();
 
+                newPath = newPath.Contains(Path.DirectorySeparatorChar) ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
+
                 Directory.CreateDirectory(newPath);
                 Directory.Move(currentDirectoryPath, newPath);
             }
@@ -352,7 +297,7 @@ namespace ConsoleFileManager
             {
                 var newPath = UiClass.PrintMessageToUser("Укажите новое имя:").Trim();
 
-                newPath = newPath.Contains(':') ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
+                newPath = newPath.Contains(Path.DirectorySeparatorChar) ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
 
                 Directory.Move(currentDirectoryPath, newPath);
 
