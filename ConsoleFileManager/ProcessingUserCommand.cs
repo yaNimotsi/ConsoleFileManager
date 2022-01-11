@@ -62,8 +62,10 @@ namespace ConsoleFileManager
                     DeleteDirectory(arrFromCommand);
                     break;
                 case "ren":
+                    RenameDirectory(command);
                     break;
                 case "move":
+                    MoveDirectory(command);
                     break;
                 default:
                     UiClass.PrintNegativeMessage("Недопустимая команда");
@@ -275,20 +277,15 @@ namespace ConsoleFileManager
 
         private static void CopyDirectory(string command)
         {
-            var negativeMessage = "Указанный путь не найден!";
-            var currentDirectoryPath = command.TrimStart('c','o','p','y').Trim();
+            const string negativeMessage = "Указанный путь не найден!";
+            var currentDirectoryPath = command.TrimStart('c', 'o', 'p', 'y').Trim();
 
             if (IsDirectoryExist(currentDirectoryPath))
             {
-                var newPath = UiClass.PrintMessageToUser("Укажите куда копировать:");
-                if (IsDirectoryExist(newPath))
-                {
-                    
-                }
-                else
-                {
-                    PrintNegativeMessage(negativeMessage);
-                }
+                var newPath = UiClass.PrintMessageToUser("Укажите куда копировать:").Trim();
+
+                Directory.CreateDirectory(newPath);
+                Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(currentDirectoryPath, newPath);
             }
             else
             {
@@ -296,9 +293,105 @@ namespace ConsoleFileManager
             }
         }
 
-        private static void CopyDirectoryes()
+        /*private static void CopyContents(string sourcePath, string targetPath)
         {
+            if (!IsDirectoryExist(sourcePath) || !IsDirectoryExist(targetPath)) return;
+            
+            var filePaths = Directory.GetFiles(sourcePath);
 
+            foreach (var s in filePaths)
+            {
+                var fileName = Path.GetFileName(s);
+                var pathToFile = Path.Combine(targetPath, fileName);
+                File.Copy(s, pathToFile, true);
+            }
+
+        }
+
+        private static void CopyDirectories(string sourcePath, string targetPath)
+        {
+            if (!IsDirectoryExist(sourcePath) || !IsDirectoryExist(targetPath)) return;
+
+            var directories = Directory.EnumerateDirectories(sourcePath);
+
+            var dirs = new Stack<string>();
+
+            dirs.Push(sourcePath);
+
+            while (dirs.Count > 0)
+            {
+                var currentDir = dirs.Pop();
+
+                if (!IsDirectoryExist(currentDir))
+                {
+                    Directory.CreateDirectory(currentDir);
+                }
+
+                string[] subDirs;
+
+                try
+                {
+                    subDirs = Directory.(currentDir);
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    Console.WriteLine(e.Message);
+                    continue;
+                }
+                catch (System.IO.DirectoryNotFoundException e)
+                {
+                    Console.WriteLine(e.Message);
+                    continue;
+                }
+
+                foreach (string str in subDirs)
+                {
+                    dirs.Push(str);
+                }
+                    
+            }
+        }*/
+
+        private static void MoveDirectory(string command)
+        {
+            const string negativeMessage = "Указанный путь не найден!";
+            var currentDirectoryPath = command.TrimStart('m', 'o', 'v', 'e').Trim();
+
+            if (IsDirectoryExist(currentDirectoryPath))
+            {
+                var newPath = UiClass.PrintMessageToUser("Укажите куда переместить:").Trim();
+
+                Directory.CreateDirectory(newPath);
+                Directory.Move(currentDirectoryPath, newPath);
+            }
+            else
+            {
+                PrintNegativeMessage(negativeMessage);
+            }
+        }
+
+        private static void RenameDirectory(string command)
+        {
+            const string negativeMessage = "Указанный путь не найден!";
+            var currentDirectoryPath = command.TrimStart('r', 'e', 'n').Trim();
+
+            currentDirectoryPath = currentDirectoryPath.Contains(':') ? currentDirectoryPath : Path.Combine(UiClass.UserLastPath, currentDirectoryPath);
+
+            if (IsDirectoryExist(currentDirectoryPath))
+            {
+                var newPath = UiClass.PrintMessageToUser("Укажите новое имя:").Trim();
+
+                newPath = newPath.Contains(':') ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
+
+                //Directory.CreateDirectory(newPath);
+                Directory.Move(currentDirectoryPath, newPath);
+
+                GoToNewUserDirectory(UiClass.UserLastPath);
+            }
+            else
+            {
+                PrintNegativeMessage(negativeMessage);
+            }
         }
 
         private static bool IsDirectoryExist(string path)

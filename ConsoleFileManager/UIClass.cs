@@ -79,7 +79,7 @@ namespace ConsoleFileManager
 
         internal static void SetCursorToCommandPosition(string text)
         {
-            for (int i = ColumnToCommand; i < 120; i++)
+            for (int i = 1; i < 120; i++)
             {
                 Console.SetCursorPosition(i, RowToCommand);
                 Console.Write(" ");
@@ -288,8 +288,12 @@ namespace ConsoleFileManager
         /// </summary>
         private static void GetElementsToPrint()
         {
+            
+
             _contentToPrint = new List<SubElement>();
             _contentToPrint.Clear();
+
+            if (_content == null) return;
 
             var startIndex = _numPage * _countRowOnPage;
             var endIndex = startIndex + _countRowOnPage - 1;

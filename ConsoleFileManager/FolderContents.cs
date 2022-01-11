@@ -3,7 +3,7 @@ using System.IO;
 
 namespace ConsoleFileManager
 {
-    public static class FolderContents
+    internal static class FolderContents
     {
         private static readonly List<FileInfo> SubFilesInfo = new List<FileInfo>();
         private static readonly List<DirectoryInfo> SubDirectoriesInfo = new List<DirectoryInfo>();
@@ -18,7 +18,7 @@ namespace ConsoleFileManager
                 return null;
             }
 
-            if (File.Exists(pathToMainMainFolder)) return null;
+            if (!Directory.Exists(pathToMainMainFolder)) return null;
             
             var directories = Directory.EnumerateDirectories(pathToMainMainFolder);
 
