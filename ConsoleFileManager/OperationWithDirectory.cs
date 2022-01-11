@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace ConsoleFileManager
 {
-    internal abstract class OperationWithDirectory : IDirectoryOperations
+    internal class OperationWithDirectory : IOperations
     {
         public void GoToDirectory(string newPath)
         {
@@ -18,7 +17,7 @@ namespace ConsoleFileManager
             {
                 var finalPath = newPath.TrimStart('c', 'd').Trim();
 
-                var result = newPath.Contains((char)92) ? GoToNewUserDirectory(newPath) : GoToSubDirectory(newPath);
+                var result = finalPath.Contains(Path.DirectorySeparatorChar) ? GoToNewUserDirectory(finalPath) : GoToSubDirectory(finalPath);
 
                 if (result) return;
 
@@ -72,7 +71,7 @@ namespace ConsoleFileManager
         {
             var fullPath = "";
 
-            for (int i = 1; i < newDirectoryName.Count; i++)
+            for (var i = 1; i < newDirectoryName.Count; i++)
             {
                 fullPath += newDirectoryName[i];
             }
@@ -114,21 +113,47 @@ namespace ConsoleFileManager
             UiClass.PrintSectionContent();
         }
 
-        public void Copy(string currentPath, string newPath)
+        public void Copy(string command)
         {
-            throw new NotImplementedException();
+            const string negativeMessage = "Указанный путь не найден!";
+            var currentDirectoryPath = command.TrimStart('c', 'o', 'p', 'y').Trim();
+
+            if (IsDirectoryExist(currentDirectoryPath))
+            {
+                var newPath = UiClass.PrintMessageToUser("Укажите куда копировать:").Trim();
+
+                Directory.CreateDirectory(newPath);
+                Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(currentDirectoryPath, newPath);
+            }
+            else
+            {
+                PrintNegativeMessage(negativeMessage);
+            }
         }
 
-        public void Move(string currentPath, string newPath)
+        public void Move(string command)
         {
-            throw new NotImplementedException();
-        }
+            const string negativeMessage = "Указанный путь не найден!";
+            var currentDirectoryPath = command.TrimStart('m', 'o', 'v', 'e').Trim();
 
+            if (IsDirectoryExist(currentDirectoryPath))
+            {
+                var newPath = UiClass.PrintMessageToUser("Укажите куда переместить:").Trim();
+
+                Directory.CreateDirectory(newPath);
+                Directory.Move(currentDirectoryPath, newPath);
+            }
+            else
+            {
+                PrintNegativeMessage(negativeMessage);
+            }
+        }
+        
         public void Delete(IReadOnlyList<string> command)
         {
             var fullPath = "";
 
-            for (int i = 1; i < command.Count; i++)
+            for (var i = 1; i < command.Count; i++)
             {
                 fullPath += command[i];
             }
@@ -164,9 +189,43 @@ namespace ConsoleFileManager
             UiClass.PrintSectionContent();
         }
 
-        public void Rename(string currentPath, string newName)
+        public void Rename(string command)
         {
-            throw new NotImplementedException();
+            const string negativeMessage = "Указанный путь не найден!";
+            var currentDirectoryPath = command.TrimStart('r', 'e', 'n').Trim();
+
+            currentDirectoryPath = currentDirectoryPath.Contains(Path.DirectorySeparatorChar) ? currentDirectoryPath : Path.Combine(UiClass.UserLastPath, currentDirectoryPath);
+
+            if (IsDirectoryExist(currentDirectoryPath))
+            {
+                var newPath = UiClass.PrintMessageToUser("Укажите новое имя:").Trim();
+
+                newPath = newPath.Contains(':') ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
+
+                Directory.Move(currentDirectoryPath, newPath);
+
+                GoToNewUserDirectory(UiClass.UserLastPath);
+            }
+            else
+            {
+                PrintNegativeMessage(negativeMessage);
+            }
+        }
+
+        private static bool IsDirectoryExist(string path)
+        {
+            return Directory.Exists(path);
+        }
+
+        /// <summary>
+        /// Вовод сообщения пользователю в случае недопустимой комманды
+        /// </summary>
+        /// <param name="message"> Сообщение для вывода</param>
+        private static void PrintNegativeMessage(string message)
+        {
+            UiClass.SetCursorToCommandPosition("Введите команду:");
+            Console.Write(message);
+            Console.ReadLine();
         }
     }
 }

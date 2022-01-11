@@ -15,13 +15,13 @@ namespace ConsoleFileManager
         private static int _rowsToTopMargin;
 
         //public string JournalPath { get; set; }
-        
+
         private static List<SubElement> _content;
         private static List<SubElement> _contentToPrint;
 
         private static int _numPage;
         private static int _countRowOnPage;
-        
+
         public static string UserLastPath
         {
             get => _userLastPath;
@@ -38,7 +38,7 @@ namespace ConsoleFileManager
 
         public UiClass()
         {
-            //Console.CursorVisible = false;
+            Console.CursorVisible = false;
 
             Console.SetWindowSize(120, 41);
             Console.SetBufferSize(120, 41);
@@ -74,7 +74,7 @@ namespace ConsoleFileManager
 
             PrintSectionContent();
 
-            var processingUserCommand = new ProcessingUserCommand();
+            new ProcessingUserCommand();
         }
 
         internal static void SetCursorToCommandPosition(string text)
@@ -288,7 +288,7 @@ namespace ConsoleFileManager
         /// </summary>
         private static void GetElementsToPrint()
         {
-            
+
 
             _contentToPrint = new List<SubElement>();
             _contentToPrint.Clear();
@@ -315,7 +315,7 @@ namespace ConsoleFileManager
 
         internal static string PrintMessageToUser(string message)
         {
-            SetCursorToCommandPosition(message, message.Length+2);
+            SetCursorToCommandPosition(message, message.Length + 2);
             return Console.ReadLine();
         }
     }

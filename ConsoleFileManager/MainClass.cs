@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace ConsoleFileManager
+﻿namespace ConsoleFileManager
 {
     internal static class MainClass
     {
         private static void Main()
         {
-            var newUi = new UiClass();
+            var uiClass = new UiClass();
         }
     }
 }

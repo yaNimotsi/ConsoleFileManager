@@ -68,7 +68,7 @@ namespace ConsoleFileManager
                     MoveDirectory(command);
                     break;
                 default:
-                    UiClass.PrintNegativeMessage("Недопустимая команда");
+                    UiClass.PrintNegativeMessage("Команда не распознана");
                     break;
             }
         }
@@ -83,19 +83,19 @@ namespace ConsoleFileManager
             {
                 UiClass.SetCursorToCommandPosition("Введите команду:");
                 Console.Write("Недопустимая команда");
+                return;
             }
-            else
-            {
-                var newPath = userCommand.TrimStart('c', 'd').Trim();
 
-                var result = newPath.Contains((char)92) ? GoToNewUserDirectory(newPath) : GoToSubDirectory(newPath);
+            var newPath = userCommand.TrimStart('c', 'd').Trim();
 
-                if (result) return;
+            var result = newPath.Contains((char)92) ? GoToNewUserDirectory(newPath) : GoToSubDirectory(newPath);
 
-                UiClass.SetCursorToCommandPosition("Введите команду:");
-                Console.Write("Недопустимая команда");
-                Console.ReadLine();
-            }
+            if (result) return;
+
+            UiClass.SetCursorToCommandPosition("Введите команду:");
+            Console.Write("Недопустимая команда");
+            Console.ReadLine();
+
         }
 
         /// <summary>
@@ -107,12 +107,7 @@ namespace ConsoleFileManager
         {
             if (!Directory.Exists(newPath)) return false;
 
-            Console.Title = UiClass.WindowName + " Путь:" + newPath;
-            UiClass.NumPage = 0;
-            UiClass.UserLastPath = newPath;
-
-            UiClass.GetContent(UiClass.UserLastPath);
-            UiClass.PrintSectionContent();
+            UpdateConsoleWindow(newPath);
 
             return true;
         }
@@ -124,18 +119,27 @@ namespace ConsoleFileManager
         /// <returns></returns>
         private static bool GoToSubDirectory(string nameSubDirectory)
         {
-            var fullPath = Path.Combine(UiClass.UserLastPath, nameSubDirectory);
+            var newPath = Path.Combine(UiClass.UserLastPath, nameSubDirectory);
 
-            if (!Directory.Exists(fullPath)) return false;
+            if (!Directory.Exists(newPath)) return false;
 
-            Console.Title = UiClass.WindowName + " Путь:" + fullPath;
+            UpdateConsoleWindow(newPath);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Update data in console
+        /// </summary>
+        /// <param name="newPath"></param>
+        private static void UpdateConsoleWindow(string newPath)
+        {
+            Console.Title = UiClass.WindowName + " Путь:" + newPath;
             UiClass.NumPage = 0;
-            UiClass.UserLastPath = fullPath;
+            UiClass.UserLastPath = newPath;
 
             UiClass.GetContent(UiClass.UserLastPath);
             UiClass.PrintSectionContent();
-
-            return true;
         }
 
         /// <summary>
@@ -182,7 +186,7 @@ namespace ConsoleFileManager
         {
             var fullPath = "";
 
-            for (int i = 1; i < command.Count; i++)
+            for (var i = 1; i < command.Count; i++)
             {
                 fullPath += command[i];
             }
@@ -224,11 +228,15 @@ namespace ConsoleFileManager
             UiClass.PrintSectionContent();
         }
 
+        /// <summary>
+        /// Delete directory
+        /// </summary>
+        /// <param name="command">User command</param>
         private static void DeleteDirectory(IReadOnlyList<string> command)
         {
             var fullPath = "";
 
-            for (int i = 1; i < command.Count; i++)
+            for (var i = 1; i < command.Count; i++)
             {
                 fullPath += command[i];
             }
@@ -275,14 +283,26 @@ namespace ConsoleFileManager
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// Copy directory with sub elements
+        /// </summary>
+        /// <param name="command">User command</param>
         private static void CopyDirectory(string command)
         {
             const string negativeMessage = "Указанный путь не найден!";
             var currentDirectoryPath = command.TrimStart('c', 'o', 'p', 'y').Trim();
 
+            currentDirectoryPath = currentDirectoryPath.Contains(Path.DirectorySeparatorChar) ? currentDirectoryPath : Path.Combine(UiClass.UserLastPath, currentDirectoryPath);
+
             if (IsDirectoryExist(currentDirectoryPath))
             {
                 var newPath = UiClass.PrintMessageToUser("Укажите куда копировать:").Trim();
+
+                if (IsDirectoryExist(newPath))
+                {
+                    PrintNegativeMessage("По указанному пути папка уже существует");
+                    return;
+                }
 
                 Directory.CreateDirectory(newPath);
                 Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(currentDirectoryPath, newPath);
@@ -293,69 +313,16 @@ namespace ConsoleFileManager
             }
         }
 
-        /*private static void CopyContents(string sourcePath, string targetPath)
-        {
-            if (!IsDirectoryExist(sourcePath) || !IsDirectoryExist(targetPath)) return;
-            
-            var filePaths = Directory.GetFiles(sourcePath);
-
-            foreach (var s in filePaths)
-            {
-                var fileName = Path.GetFileName(s);
-                var pathToFile = Path.Combine(targetPath, fileName);
-                File.Copy(s, pathToFile, true);
-            }
-
-        }
-
-        private static void CopyDirectories(string sourcePath, string targetPath)
-        {
-            if (!IsDirectoryExist(sourcePath) || !IsDirectoryExist(targetPath)) return;
-
-            var directories = Directory.EnumerateDirectories(sourcePath);
-
-            var dirs = new Stack<string>();
-
-            dirs.Push(sourcePath);
-
-            while (dirs.Count > 0)
-            {
-                var currentDir = dirs.Pop();
-
-                if (!IsDirectoryExist(currentDir))
-                {
-                    Directory.CreateDirectory(currentDir);
-                }
-
-                string[] subDirs;
-
-                try
-                {
-                    subDirs = Directory.(currentDir);
-                }
-                catch (UnauthorizedAccessException e)
-                {
-                    Console.WriteLine(e.Message);
-                    continue;
-                }
-                catch (System.IO.DirectoryNotFoundException e)
-                {
-                    Console.WriteLine(e.Message);
-                    continue;
-                }
-
-                foreach (string str in subDirs)
-                {
-                    dirs.Push(str);
-                }
-                    
-            }
-        }*/
-
+        /// <summary>
+        /// Move directory and sub elements 
+        /// </summary>
+        /// <param name="command">User command</param>
         private static void MoveDirectory(string command)
         {
             const string negativeMessage = "Указанный путь не найден!";
             var currentDirectoryPath = command.TrimStart('m', 'o', 'v', 'e').Trim();
+
+            currentDirectoryPath = currentDirectoryPath.Contains(Path.DirectorySeparatorChar) ? currentDirectoryPath : Path.Combine(UiClass.UserLastPath, currentDirectoryPath);
 
             if (IsDirectoryExist(currentDirectoryPath))
             {
@@ -370,12 +337,16 @@ namespace ConsoleFileManager
             }
         }
 
+        /// <summary>
+        /// Change name to directory
+        /// </summary>
+        /// <param name="command">User command</param>
         private static void RenameDirectory(string command)
         {
             const string negativeMessage = "Указанный путь не найден!";
             var currentDirectoryPath = command.TrimStart('r', 'e', 'n').Trim();
 
-            currentDirectoryPath = currentDirectoryPath.Contains(':') ? currentDirectoryPath : Path.Combine(UiClass.UserLastPath, currentDirectoryPath);
+            currentDirectoryPath = currentDirectoryPath.Contains(Path.DirectorySeparatorChar) ? currentDirectoryPath : Path.Combine(UiClass.UserLastPath, currentDirectoryPath);
 
             if (IsDirectoryExist(currentDirectoryPath))
             {
@@ -383,7 +354,6 @@ namespace ConsoleFileManager
 
                 newPath = newPath.Contains(':') ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
 
-                //Directory.CreateDirectory(newPath);
                 Directory.Move(currentDirectoryPath, newPath);
 
                 GoToNewUserDirectory(UiClass.UserLastPath);
