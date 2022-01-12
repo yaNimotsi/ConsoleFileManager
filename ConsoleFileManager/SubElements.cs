@@ -7,6 +7,7 @@ namespace ConsoleFileManager
     {
         public List<SubElement> Contents { get; }
 
+        // ReSharper disable once UnusedMember.Local
         private SubElements()
         {
 

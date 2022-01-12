@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace ConsoleFileManager
 {
@@ -21,7 +22,11 @@ namespace ConsoleFileManager
             {
                 UiClass.SetCursorToCommandPosition("Введите команду:");
                 command = Console.ReadLine()?.ToLower().Trim();
-                DetectCommand(command);
+
+                if (!string.IsNullOrWhiteSpace(command))
+                {
+                    DetectCommand(command);
+                }
             }
         }
 
@@ -53,13 +58,13 @@ namespace ConsoleFileManager
                     GoToNewDirectory(command);
                     break;
                 case "copy":
-                    CopyDirectory(command);
+                    MakeCopy(command);
                     break;
                 case "mkdir":
-                    MakeNewDirectory(arrFromCommand);
+                    MakeNewDirectory(command, arrFromCommand);
                     break;
                 case "del":
-                    DeleteDirectory(arrFromCommand);
+                    DeleteDirectory(command, arrFromCommand);
                     break;
                 case "ren":
                     RenameDirectory(command);
@@ -79,8 +84,7 @@ namespace ConsoleFileManager
         /// <param name="userCommand"> Указанный пользователем путь</param>
         private static void GoToNewDirectory(string userCommand)
         {
-            var operationWithDirectory = new OperationWithDirectory();
-            operationWithDirectory.GoToDirectory(userCommand);
+            OperationWithDirectory.GoToDirectory(userCommand);
         }
 
         /// <summary>
@@ -123,162 +127,65 @@ namespace ConsoleFileManager
         /// Создание новой папки по указанному пути
         /// </summary>
         /// <param name="command"></param>
-        private static void MakeNewDirectory(IReadOnlyList<string> command)
+        /// <param name="arrFromCommand"></param>
+        private static void MakeNewDirectory(string command, IReadOnlyList<string> arrFromCommand)
         {
-            var fullPath = "";
-
-            for (var i = 1; i < command.Count; i++)
+            if (GetTypeByPath(command) == 0)
             {
-                fullPath += command[i];
+                OperationWithDirectory.CreateDirectory(arrFromCommand);
             }
-
-            if (!fullPath.Contains(Path.DirectorySeparatorChar))
+            else
             {
-                fullPath += UiClass.UserLastPath;
+                OperationWithFile.CreateFile(arrFromCommand);
             }
-
-            if (Directory.Exists(fullPath))
-            {
-                PrintNegativeMessage("Папка уже существует или введено недопустимое имя папки");
-                return;
-            }
-
-            try
-            {
-                Directory.CreateDirectory(fullPath);
-            }
-            catch (PathTooLongException e)
-            {
-                PrintNegativeMessage(e.Message);
-            }
-            catch (UnauthorizedAccessException e)
-            {
-                PrintNegativeMessage(e.Message);
-            }
-            catch (DirectoryNotFoundException e)
-            {
-                PrintNegativeMessage(e.Message);
-            }
-            catch (IOException e)
-            {
-                PrintNegativeMessage(e.Message);
-            }
-
-            UiClass.GetContent(UiClass.UserLastPath);
-            UiClass.NumPage = 0;
-            UiClass.PrintSectionContent();
         }
 
         /// <summary>
         /// Delete directory
         /// </summary>
         /// <param name="command">User command</param>
-        private static void DeleteDirectory(IReadOnlyList<string> command)
+        /// <param name="arrFromCommand"></param>
+        private static void DeleteDirectory(string command, IReadOnlyList<string> arrFromCommand)
         {
-            var fullPath = "";
-
-            for (var i = 1; i < command.Count; i++)
+            if (GetTypeByPath(command) == 0)
             {
-                fullPath += command[i];
+                OperationWithDirectory.Delete(arrFromCommand);
             }
-
-            if (!fullPath.Contains(Path.DirectorySeparatorChar))
+            else
             {
-                fullPath += UiClass.UserLastPath;
+                OperationWithFile.Delete(arrFromCommand);
             }
-
-            try
-            {
-                Directory.Delete(fullPath);
-            }
-            catch (PathTooLongException e)
-            {
-                PrintNegativeMessage(e.Message);
-            }
-            catch (UnauthorizedAccessException e)
-            {
-                PrintNegativeMessage(e.Message);
-            }
-            catch (DirectoryNotFoundException e)
-            {
-                PrintNegativeMessage(e.Message);
-            }
-            catch (IOException e)
-            {
-                PrintNegativeMessage(e.Message);
-            }
-
-            UiClass.GetContent(UiClass.UserLastPath);
-            UiClass.NumPage = 0;
-            UiClass.PrintSectionContent();
-        }
-
-        /// <summary>
-        /// Вовод сообщения пользователю в случае недопустимой комманды
-        /// </summary>
-        /// <param name="message"> Сообщение для вывода</param>
-        private static void PrintNegativeMessage(string message)
-        {
-            UiClass.SetCursorToCommandPosition("Введите команду:");
-            Console.Write(message);
-            Console.ReadLine();
         }
 
         /// <summary>
         /// Copy directory with sub elements
         /// </summary>
         /// <param name="command">User command</param>
-        private static void CopyDirectory(string command)
+        private static void MakeCopy(string command)
         {
-            const string negativeMessage = "Указанный путь не найден!";
-            var currentDirectoryPath = command.TrimStart('c', 'o', 'p', 'y').Trim();
-
-            currentDirectoryPath = currentDirectoryPath.Contains(Path.DirectorySeparatorChar) ? currentDirectoryPath : Path.Combine(UiClass.UserLastPath, currentDirectoryPath);
-
-            if (IsDirectoryExist(currentDirectoryPath))
+            if (GetTypeByPath(command) == 0)
             {
-                var newPath = UiClass.PrintMessageToUser("Укажите куда копировать:").Trim();
-
-                newPath = newPath.Contains(Path.DirectorySeparatorChar) ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
-
-                if (IsDirectoryExist(newPath))
-                {
-                    PrintNegativeMessage("По указанному пути папка уже существует");
-                    return;
-                }
-
-                Directory.CreateDirectory(newPath);
-                Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(currentDirectoryPath, newPath);
+                OperationWithDirectory.Copy(command);
             }
             else
             {
-                PrintNegativeMessage(negativeMessage);
+                OperationWithFile.Copy(command);
             }
         }
-
+        
         /// <summary>
         /// Move directory and sub elements 
         /// </summary>
         /// <param name="command">User command</param>
         private static void MoveDirectory(string command)
         {
-            const string negativeMessage = "Указанный путь не найден!";
-            var currentDirectoryPath = command.TrimStart('m', 'o', 'v', 'e').Trim();
-
-            currentDirectoryPath = currentDirectoryPath.Contains(Path.DirectorySeparatorChar) ? currentDirectoryPath : Path.Combine(UiClass.UserLastPath, currentDirectoryPath);
-
-            if (IsDirectoryExist(currentDirectoryPath))
+            if (GetTypeByPath(command) == 0)
             {
-                var newPath = UiClass.PrintMessageToUser("Укажите куда переместить:").Trim();
-
-                newPath = newPath.Contains(Path.DirectorySeparatorChar) ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
-
-                Directory.CreateDirectory(newPath);
-                Directory.Move(currentDirectoryPath, newPath);
+                OperationWithDirectory.Move(command);
             }
             else
             {
-                PrintNegativeMessage(negativeMessage);
+                OperationWithFile.Move(command);
             }
         }
 
@@ -288,30 +195,29 @@ namespace ConsoleFileManager
         /// <param name="command">User command</param>
         private static void RenameDirectory(string command)
         {
-            const string negativeMessage = "Указанный путь не найден!";
-            var currentDirectoryPath = command.TrimStart('r', 'e', 'n').Trim();
-
-            currentDirectoryPath = currentDirectoryPath.Contains(Path.DirectorySeparatorChar) ? currentDirectoryPath : Path.Combine(UiClass.UserLastPath, currentDirectoryPath);
-
-            if (IsDirectoryExist(currentDirectoryPath))
+            if (GetTypeByPath(command) == 0)
             {
-                var newPath = UiClass.PrintMessageToUser("Укажите новое имя:").Trim();
-
-                newPath = newPath.Contains(Path.DirectorySeparatorChar) ? newPath : Path.Combine(UiClass.UserLastPath, newPath);
-
-                Directory.Move(currentDirectoryPath, newPath);
-
-                GoToNewUserDirectory(UiClass.UserLastPath);
+                OperationWithDirectory.Rename(command);
             }
             else
             {
-                PrintNegativeMessage(negativeMessage);
+                OperationWithFile.Rename(command);
             }
         }
 
-        private static bool IsDirectoryExist(string path)
+        /// <summary>
+        /// Get type by path
+        /// </summary>
+        /// <param name="path"> Path to object</param>
+        /// <returns> 0 if it Directory and 1 if it File</returns>
+        private static byte GetTypeByPath(string path)
         {
-            return Directory.Exists(path);
+            if (!UiClass.Content.Any(element => string.Equals(element.PathToElement, path))) return 0;
+            
+            var fileAttribute = File.GetAttributes(path);
+
+            return fileAttribute == FileAttributes.Directory ? (byte)0 : (byte)1;
+
         }
     }
 }

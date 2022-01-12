@@ -74,9 +74,14 @@ namespace ConsoleFileManager
 
             PrintSectionContent();
 
+            // ReSharper disable once ObjectCreationAsStatement
             new ProcessingUserCommand();
         }
 
+        /// <summary>
+        /// Set cursor to command position and will write the trancmitted text 
+        /// </summary>
+        /// <param name="text">Trancmitted text </param>
         internal static void SetCursorToCommandPosition(string text)
         {
             for (int i = 1; i < 120; i++)
@@ -89,7 +94,12 @@ namespace ConsoleFileManager
             Console.SetCursorPosition(ColumnToCommand, RowToCommand);
         }
 
-        internal static void SetCursorToCommandPosition(string text, int columnToNewCommand)
+        /// <summary>
+        /// Set cursor to command position and will write the trancmitted text 
+        /// </summary>
+        /// <param name="text">Trancmitted text </param>
+        /// <param name="columnToNewCommand">Tolumn to set cursor</param>
+        private static void SetCursorToCommandPosition(string text, int columnToNewCommand)
         {
             for (int i = 0; i < 120; i++)
             {
@@ -121,7 +131,7 @@ namespace ConsoleFileManager
         /// </summary>
         /// <param name="key"> Имя параметра</param>
         /// <param name="value"> Знеачение параметра</param>
-        private void UpdateAppConfigFile(string key, string value)
+        internal static void UpdateAppConfigFile(string key, string value)
         {
             try
             {
@@ -145,6 +155,10 @@ namespace ConsoleFileManager
         }
         #endregion
 
+        /// <summary>
+        /// Print info about elements in directory
+        /// </summary>
+        /// <param name="subElements">Sub elements in directory</param>
         private static void PrintContentInfo(List<SubElement> subElements)
         {
             var rowToPrint = 2;
@@ -306,6 +320,10 @@ namespace ConsoleFileManager
             }
         }
 
+        /// <summary>
+        /// Print message in console with transmitted text
+        /// </summary>
+        /// <param name="message">Transmitted text</param>
         internal static void PrintNegativeMessage(string message)
         {
             SetCursorToCommandPosition("Введите команду:");
@@ -313,6 +331,11 @@ namespace ConsoleFileManager
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// Print message in console and return user answer
+        /// </summary>
+        /// <param name="message">Transmitted text</param>
+        /// <returns>User entered text</returns>
         internal static string PrintMessageToUser(string message)
         {
             SetCursorToCommandPosition(message, message.Length + 2);

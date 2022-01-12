@@ -12,6 +12,7 @@ namespace ConsoleFileManager
         public long ElementSize { get;}
         public string PathToElement { get;}
 
+        // ReSharper disable once UnusedMember.Local
         private SubElement()
         {
 
@@ -26,11 +27,12 @@ namespace ConsoleFileManager
             ElementSize = ConvertBiteToKiloByte(fileInfo.Length);
             PathToElement = fileInfo.FullName;
         }
+
         public SubElement(DirectoryInfo directoryInfo)
         {
             NameElement = CheckLengthSize(directoryInfo.Name, 47);
             TypeElement = "Folder";
-            TypeAccessToElement = GetFolderAccessType(directoryInfo.Attributes);
+            TypeAccessToElement = GetDirectoryAccessType(directoryInfo.Attributes);
             DateCreateElement = directoryInfo.CreationTime;
             PathToElement = directoryInfo.FullName;
         }
@@ -38,8 +40,8 @@ namespace ConsoleFileManager
         /// <summary>
         /// Если длина имени выше указанной, то обрезаем
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="maxLength"></param>
+        /// <param name="name">Elemet name</param>
+        /// <param name="maxLength">Max acceptable lenght name</param>
         /// <returns></returns>
         private static string CheckLengthSize(string name , int maxLength)
         {
@@ -53,9 +55,9 @@ namespace ConsoleFileManager
         /// <summary>
         /// Получение типа доступа к папке
         /// </summary>
-        /// <param name="attributes"></param>
-        /// <returns></returns>
-        private static bool GetFolderAccessType(FileAttributes attributes)
+        /// <param name="attributes">Folder attributes</param>
+        /// <returns>Folder acces type</returns>
+        private static bool GetDirectoryAccessType(FileAttributes attributes)
         {
             return (attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly;
         }
@@ -63,8 +65,8 @@ namespace ConsoleFileManager
         /// <summary>
         /// Преобразование размера документа из bite в killoByte
         /// </summary>
-        /// <param name="elementSizeInBite"></param>
-        /// <returns></returns>
+        /// <param name="elementSizeInBite">File size in bytes</param>
+        /// <returns>File size in Kb</returns>
         private static long ConvertBiteToKiloByte(long elementSizeInBite)
         {
             if (elementSizeInBite == 0) return 0;
